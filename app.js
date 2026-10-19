@@ -259,7 +259,7 @@ function saveBulkBills(){
  }
  state.bulkDraft=null;state.bulkText='';
  updateData();closeModal();route('bills');
- toast(${created} ajoutée(s), ${updated} mise(s) à jour${unchanged?', '+unchanged+' déjà enregistrée(s)':''});
+ toast(`${created} ajoutée(s), ${updated} mise(s) à jour${unchanged?', '+unchanged+' déjà enregistrée(s)':''}`);
 }
 
 function importStart(){if(state.source!=='vault'){openCreateVault();return;}openModal('Importer un relevé bancaire',`<p class="hint">Ton fichier reste sur cet appareil. Les formats <strong>CSV</strong> et <strong>CAMT.053 XML</strong> sont pris en charge ; aucune connexion bancaire n’est requise.</p><form data-form="import-file">${inputField('Relevé bancaire','bankFile','','file',true)}<div class="security-list">🔒 Les relevés sont analysés exclusivement dans ton navigateur. L’aperçu te permettra de contrôler les colonnes et le sens des montants AVANT d’enregistrer.</div>${actionButtons('Analyser ce fichier')}</form>`);$('#f_bankFile').accept='.csv,.txt,.xml,.camt,text/csv,text/xml,application/xml';}
