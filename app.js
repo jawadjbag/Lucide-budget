@@ -218,8 +218,8 @@ function showBulkBills(){
  if(state.source!=='vault'){openCreateVault();return;}
  const previous=state.bulkText||'';
  openModal('Ajouter toutes mes charges en une fois',`<p class="hint">Copie ta liste ici, une dépense par ligne. Pour les montants annuels, écris simplement <strong>/an</strong>. Sans précision, c’est <strong>/mois</strong>.</p>
- <form data-form="bulk-bills"><div class="form-field"><label for="bulkLines">Mes charges fixes et domiciliations</label><textarea id="bulkLines" name="lines" rows="11" required placeholder="Loyer : 750 €/mois&#10;Électricité : 85 €/mois&#10;Assurance voiture : 600 €/an&#10;Netflix : 15,99 €/mois">${escapeHtml(previous)</textarea></div>
- <div class="security-list">🔒 La liste est traitée sur ton appareil. Tu vérifies tout avant l’enregistrement dans ton coffre chiffré. N’inclus aucun IBAN ni numéro de carte.</div>${actionButtons('Vérifier ma liste →')</form>`);
+ <form data-form="bulk-bills"><div class="form-field"><label for="bulkLines">Mes charges fixes et domiciliations</label><textarea id="bulkLines" name="lines" rows="11" required placeholder="Loyer : 750 €/mois&#10;Électricité : 85 €/mois&#10;Assurance voiture : 600 €/an&#10;Netflix : 15,99 €/mois">${escapeHtml(previous)}</textarea></div>
+ <div class="security-list">🔒 La liste est traitée sur ton appareil. Tu vérifies tout avant l’enregistrement dans ton coffre chiffré. N’inclus aucun IBAN ni numéro de carte.</div>${actionButtons('Vérifier ma liste →')}</form>`);
 }
 function parseBulkBills(raw){
  const lines=String(raw).split(/\r?\n/).map(x=>x.trim()).filter(Boolean),found=[],errors=[];
@@ -246,7 +246,7 @@ function parseBulkBills(raw){
 function showBulkPreview(){
  const rows=state.bulkDraft||[];
  const sum=rows.reduce((a,b)=>a+monthlyEquivalent(b),0);
- const table=rows.map(b=>`<tr><td>${escapeHtml(b.name)</td><td class="right">${money(b.amount)}</td><td>${billCycleLabel(b.cycle)}</td></tr>`).join('');
+ const table=rows.map(b=>`<tr><td>${escapeHtml(b.name)}</td><td class="right">${money(b.amount)}</td><td>${billCycleLabel(b.cycle)}</td></tr>`).join('');
  openModal('Vérifie tes charges',`<p class="hint"><strong>${rows.length} lignes reconnues</strong> · ${money(sum)} de charges mensuelles estimées. Les charges déjà présentes seront mises à jour, pas doublées.</p><div class="import-preview"><table><thead><tr><th>Charge</th><th>Montant</th><th>Fréquence</th></tr></thead><tbody>${table}</tbody></table></div><p class="hint">Ces montants servent à prévoir tes frais. Ils ne seront pas comptés une deuxième fois dans tes opérations bancaires.</p><form data-form="bulk-confirm">${actionButtons('Enregistrer toutes les charges')}</form><button type="button" class="btn soft" data-action="bulk-bills">← Corriger ma liste</button>`);
 }
 function saveBulkBills(){
