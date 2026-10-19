@@ -37,3 +37,135 @@
  .advanced-overview>summary{min-height:58px;font-size:13px}
 }
 @media(max-width:350px){.simple-actions{grid-template-columns:1fr}.simple-tile{min-height:140px}}
+
+
+/* Lucide Budget — interface minimaliste, tactile et accessible */
+body{background:#f5f6fa;color:#1d2738;font-size:15px}
+.app-shell{display:block;min-height:100vh}
+.app-area{width:100%;max-width:100%;margin:0 auto}
+.topbar{height:72px;padding:0 max(25px,calc((100vw - 1000px)/2));border-bottom:1px solid #e9ebf1;background:#fff}
+.topbar-left{gap:15px}
+.app-brand{display:flex;align-items:center;gap:8px;font-size:21px;font-weight:850;letter-spacing:-1px;color:#28314a}
+.app-brand span{font-size:20px;border-radius:10px;background:#615ae7;color:white;width:32px;height:32px;display:grid;place-items:center}
+.app-brand strong{color:#625ae8;margin-left:-7px}
+.topbar-left #crumbCurrent{font-size:13px;color:#8d94a4;font-weight:650}
+.top-settings{border:1px solid #e4e7ed;border-radius:12px;background:#f7f8fb;min-height:39px;min-width:41px;font-size:20px;color:#677088}
+.page{max-width:1000px;padding:33px 27px 115px}
+.bottom-nav{display:flex;position:fixed;bottom:0;left:0;width:100%;height:calc(70px + env(safe-area-inset-bottom));padding:5px 0 env(safe-area-inset-bottom);background:rgba(255,255,255,.96);backdrop-filter:blur(16px);border-top:1px solid #e6eaf1;z-index:80;justify-content:center;gap:6px;box-shadow:0 -5px 25px #142b4810}
+.bottom-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:100px;padding:6px 24px;border:0;border-radius:14px;background:transparent;color:#838b9d;font-weight:800}
+.bottom-nav button.active{background:#f0eeff;color:#6359dd}
+.bottom-nav button span{font-size:23px;line-height:1.1}
+.bottom-nav button small{font-size:11px}
+.simple-home{display:flex;flex-direction:column;gap:20px}
+.simple-heading{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:2px}
+.simple-heading .eyebrow{font-size:11px;margin:0 0 10px;letter-spacing:1.2px}
+.simple-heading h1{font-size:36px;font-weight:860;letter-spacing:-1.3px;line-height:1.13;margin:0}
+.simple-heading p:not(.eyebrow){font-size:14px;color:#8991a2;margin:10px 0 0}
+.simple-gear{border:1px solid #e3e6ed;border-radius:12px;background:#fff;color:#535a75;min-height:46px;padding:8px 14px;font-weight:800;white-space:nowrap}
+.simple-balance{background:linear-gradient(120deg,#272b59 0%,#4840a9 65%,#6359e8 100%);color:#fff;min-height:240px;border-radius:25px;padding:35px;display:flex;align-items:center;justify-content:space-between;gap:25px;box-shadow:0 18px 45px #35309027}
+.simple-balance.is-negative{background:linear-gradient(120deg,#522d46,#a44f6c)}
+.simple-balance-label{display:block;font-size:12px;font-weight:800;letter-spacing:1.7px;color:#e4e0ff}
+.simple-balance strong{display:block;font-size:50px;letter-spacing:-1.8px;margin:13px 0 6px;font-variant-numeric:tabular-nums;line-height:1.12}
+.simple-balance p{font-size:13px;color:#dedbf8;margin:0}
+.simple-add{border:0;border-radius:15px;min-height:66px;padding:16px 24px;background:#fff;color:#4639ba;font-size:16px;font-weight:850;box-shadow:0 9px 23px #10144520;white-space:nowrap}
+.simple-add.dark{background:#5f57df;color:white}
+.simple-add.full{width:100%;margin:16px 0 4px}
+.simple-add:focus-visible,.simple-gear:focus-visible,.simple-shortcut:focus-visible{outline:3px solid #b5aeff;outline-offset:3px}
+.simple-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.simple-metric{border:1px solid #eceef4;border-radius:18px;background:#fff;min-height:150px;padding:20px 17px;box-shadow:0 4px 15px #111e3505;overflow:hidden}
+.simple-metric .metric-head{display:flex;align-items:center;gap:8px}
+.simple-metric .metric-head span{height:30px;width:30px;border-radius:10px;background:#f1efff;color:#625ae8;display:grid;place-items:center;font-size:18px;flex-shrink:0}
+.simple-metric .metric-head small{font-size:11px;color:#80899b;font-weight:750;line-height:1.3}
+.simple-metric>strong{display:block;font-size:23px;font-weight:860;letter-spacing:-.7px;margin:14px 0 3px;white-space:nowrap}
+.simple-metric p{margin:4px 0 0;font-size:10.5px;color:#929bac;line-height:1.4}
+.simple-metric.negative>strong{color:#cc5c6e}
+.simple-chart-card{background:#fff;border:1px solid #ebedf3;border-radius:23px;padding:23px 27px}
+.simple-card-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.simple-card-heading h2{font-size:19px;letter-spacing:-.6px;margin:0}
+.simple-card-heading p{color:#99a1ad;font-size:12px;margin:5px 0}
+.simple-card-heading button{border:0;background:#f5f4ff;color:#6159ca;font-size:12px;font-weight:850;padding:11px 13px;border-radius:10px;white-space:nowrap}
+.simple-chart-layout{display:grid;grid-template-columns:minmax(200px,270px) 1fr;align-items:center;gap:40px;margin:13px 0 3px}
+.simple-ring{aspect-ratio:1/1;width:min(250px,100%);margin:10px auto;border-radius:50%;display:grid;place-items:center}
+.simple-ring-center{height:74%;width:74%;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:inset 0 0 0 1px #f1f2f6}
+.simple-ring-center small{color:#8c94a3;font-size:12px}
+.simple-ring-center strong{font-size:26px;letter-spacing:-1px;line-height:1.1;margin:7px 0 0}
+.simple-legend{display:flex;flex-direction:column;gap:0}
+.simple-legend>div{display:flex;align-items:center;gap:10px;min-height:50px;border-bottom:1px solid #f1f2f6}
+.simple-legend>div:last-child{border:0}
+.simple-legend .circle{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.simple-legend .circle.fixed{background:#5d62ed}
+.simple-legend .circle.outings{background:#ffb36b}
+.simple-legend .circle.other{background:#ed7792}
+.simple-legend .circle.free{background:#d9f6e8;border:1px solid #b6e2ce}
+.simple-legend span{font-size:13px;color:#60697e;flex:1}
+.simple-legend strong{font-size:15px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.simple-shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.simple-shortcut{position:relative;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-height:140px;border:1px solid #e9ecf4;border-radius:18px;background:#fff;padding:21px 23px}
+.simple-shortcut>span{font-size:25px;color:#5f5ce2}
+.simple-shortcut strong{font-size:16px}
+.simple-shortcut small{font-size:12px;color:#8d94a5}
+.simple-shortcut b{position:absolute;right:19px;top:21px;font-size:18px;color:#a2a9bb}
+.simple-disclaimer{font-size:11px;color:#8e98a7;margin:0 3px 10px;line-height:1.6}
+.simple-empty{background:#f0f0ff;border:1px solid #deddf8;border-radius:17px;padding:16px 20px;display:flex;gap:13px;align-items:center}
+.simple-empty>span{height:34px;width:34px;border-radius:50%;background:#645de7;color:white;display:grid;place-items:center;flex-shrink:0;font-weight:800}
+.simple-empty>div{flex:1}
+.simple-empty strong{display:block;font-size:14px}
+.simple-empty small{display:block;color:#7d79a9;margin-top:3px;font-size:11px}
+.simple-subpage{max-width:750px;margin:0 auto}
+.simple-subhead .eyebrow{margin:15px 0 6px}
+.simple-subhead h1{font-size:35px;letter-spacing:-1.2px;margin:0}
+.simple-subhead p:not(.eyebrow){margin:7px 0 20px;color:#929bad}
+.simple-back{border:0;background:transparent;color:#6159d9;padding:8px 0;font-weight:800}
+.simple-subtotal{background:#fff;border:1px solid #e9ecf2;border-radius:18px;padding:21px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:18px}
+.simple-subtotal span{color:#8993a4;font-size:13px}
+.simple-subtotal strong{font-size:26px;letter-spacing:-1px}
+.simple-text-link{width:100%;background:transparent;border:0;color:#5a53d5;font-size:13px;font-weight:800;text-align:center;padding:15px}
+.simple-list{margin:17px 0 8px;border:1px solid #e9ecf3;border-radius:18px;background:#fff;overflow:hidden}
+.simple-list-item{padding:18px 21px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #f0f1f4}
+.simple-list-item:last-child{border-bottom:0}
+.simple-list-item>div:first-child{min-width:0;flex:1}
+.simple-list-item strong{font-size:14px;display:block;overflow:hidden;text-overflow:ellipsis}
+.simple-list-item small{display:block;color:#9aa3b0;font-size:11px;margin-top:3px}
+.item-tail{display:flex;align-items:center;gap:10px}
+.item-tail>strong{font-size:16px;white-space:nowrap;text-align:right}
+.item-tail>strong small{display:inline;font-size:10px;margin-left:3px}
+.item-tail>button{border:1px solid #e9eaf2;background:#f8f9fc;color:#555b75;border-radius:10px;min-width:38px;min-height:38px;font-size:16px}
+.simple-list-empty{padding:25px;text-align:center;color:#9aa2b1}
+.simple-more{display:flex;flex-direction:column;gap:8px;margin:15px 0}
+.simple-more button{border:1px solid #e5e8ef;border-radius:13px;background:#fff;padding:17px 20px;text-align:left;font-size:13px;font-weight:800;color:#5e5ac2}
+@media(max-width:750px){
+ .topbar{height:61px;padding:0 18px}
+ .app-brand{font-size:19px}
+ .topbar-left #crumbCurrent,.topbar .top-crumb{display:none}
+ .page{padding:26px 17px 102px}
+ .simple-heading h1{font-size:29px}
+ .simple-heading p:not(.eyebrow){font-size:13px}
+ .simple-gear span{display:none}
+ .simple-gear{min-width:46px;font-size:20px}
+ .simple-balance{padding:26px 23px;min-height:265px;flex-direction:column;align-items:stretch;justify-content:space-between;gap:22px;border-radius:22px}
+ .simple-balance strong{font-size:43px}
+ .simple-balance .simple-add{width:100%;min-height:58px}
+ .simple-metrics{grid-template-columns:1fr 1fr;gap:10px}
+ .simple-metric{min-height:137px;padding:16px 12px}
+ .simple-metric>strong{font-size:21px;margin-top:12px}
+ .simple-metric .metric-head small{font-size:10px}
+ .simple-metric p{font-size:10px}
+ .simple-chart-card{padding:21px 17px;border-radius:20px}
+ .simple-chart-layout{grid-template-columns:1fr;gap:13px;margin-top:8px}
+ .simple-ring{width:215px}
+ .simple-legend>div{min-height:45px}
+ .simple-shortcut{min-height:129px;padding:16px 15px}
+ .simple-shortcut strong{font-size:14px}
+ .simple-shortcut small{font-size:10px}
+ .simple-shortcut>span{font-size:21px}
+ .bottom-nav{justify-content:space-around;gap:0}
+ .bottom-nav button{min-width:29%;padding:6px}
+ .bottom-nav button small{font-size:11px}
+ .simple-empty{flex-wrap:wrap}
+ .simple-empty .btn{width:100%}
+ .simple-subhead h1{font-size:30px}
+ .simple-subtotal{padding:17px 18px}
+ .simple-subtotal strong{font-size:22px}
+ .item-tail>strong{font-size:14px}
+}
+@media(max-width:380px){.simple-balance strong{font-size:36px}.simple-metric>strong{font-size:18px}.simple-heading h1{font-size:25px}}
