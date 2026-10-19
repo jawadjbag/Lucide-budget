@@ -87,14 +87,20 @@ function barChart(){const mons=recentMonths(), max=Math.max(1,...mons.flatMap(m=
 function categoryRows(maxRows=6){const cat=Object.entries(totalCat()).sort((a,b)=>b[1]-a[1]).slice(0,maxRows);if(!cat.length)return noData('Pas encore de dépenses','Ajoute ou importe des transactions pour obtenir la répartition.','◉');const top=cat[0][1];return cat.map(([name,value])=>`<div class="category-row"><span class="cat-glyph">${CATICONS[name]||'☷'}</span><div class="category-details"><strong>${escapeHtml(name)}</strong><div class="progress"><span style="width:${(value/top*100).toFixed(1)}%"></span></div></div><span class="category-amount mono">${money(value)}</span></div>`).join('');}
 function transactionRows(rows,withButtons=false){if(!rows.length)return noData('Aucune transaction','Tu peux saisir une opération ou importer un relevé.','⇄');return rows.map(t=>`<div class="transaction-row"><div class="cat-glyph">${CATICONS[t.category]||'☷'}</div><div class="transaction-main"><strong>${escapeHtml(t.name)}</strong><small>${dateLabel(t.date)} · ${escapeHtml(t.category)}${t.source?' · '+escapeHtml(t.source):''}</small></div><div class="transaction-amount mono ${isIncome(t)?'metric-positive':''}">${t.amount>0?'+':''}${money(t.amount)}</div>${withButtons?`<button type="button" class="transaction-action" data-action="edit-transaction" data-id="${t.id}" aria-label="Modifier">✎</button>`:''}</div>`).join('');}
 function renderOverview(){const s=snapshot(),cats=Object.entries(totalCat()).sort((a,b)=>b[1]-a[1]);const topCat=cats[0];const yearNet=recentMonths().reduce((z,m)=>z+snapshot(m).net,0);
- return `${pageHead('PILOTAGE FINANCIER','L’argent, enfin lisible.','Comprends ton mois, vois tes priorités et reprends le contrôle.',`${monthSwitch()}<button class="btn primary" data-action="new-transaction">＋ Transaction</button>`)}
+ return `${pageHead('TON ARGENT','Ton argent, simplement.','Tout ce qui entre, tout ce qui sort. Sans tableaux compliqués.',`${monthSwitch()}<button class="btn primary" data-action="new-transaction">＋ Transaction</button>`)}
  ${state.source==='demo'?demoBanner():''}
  ${state.month===monthId(nowIso())?`<div class="notice"><span>ⓘ</span><div><strong>Mois en cours</strong><p>Le résultat est provisoire : les revenus ou factures de fin de mois ne sont pas encore comptabilisés.</p></div></div>`:''}
+ <div class="simple-actions" aria-label="Actions rapides">
+ <button class="simple-tile featured" data-action="bulk-bills"><span class="simple-tile-icon">＋</span><strong>Tout ajouter d’un coup</strong><small>Mes factures, abonnements et domiciliations</small><span class="simple-tile-arrow">→</span></button>
+ <button class="simple-tile" data-action="open-import"><span class="simple-tile-icon">↥</span><strong>Importer mes dépenses</strong><small>Depuis un relevé bancaire CSV ou XML</small><span class="simple-tile-arrow">→</span></button>
+ <button class="simple-tile" data-route="bills"><span class="simple-tile-icon">▤</span><strong>Mes charges fixes</strong><small>Ce que je paie chaque mois</small><span class="simple-tile-arrow">→</span></button>
+ <button class="simple-tile" data-route="cuts"><span class="simple-tile-icon">✂</span><strong>Où économiser ?</strong><small>Les dépenses que je peux réduire</small><span class="simple-tile-arrow">→</span></button>
+ </div>
  <div class="stat-grid">${statsCard('Revenus encaissés',money(s.income),'Transactions positives','↗')}${statsCard('Dépenses réelles',money(s.spend),'Transactions négatives hors virements','↘','red')}${statsCard('Solde du mois',money(s.net),'Revenus moins dépenses',s.net>=0?'✳':'!',s.net>=0?'green':'red')}${statsCard('Taux d’épargne',s.income?`${s.rate.toFixed(1).replace('.',',')} %`:'—',`Objectif : ${money(state.data.goal)}/mois`,'◉',s.net>=0?'green':'amber')}</div>
- <div class="dash-grid"><section class="panel">${sectionTitle('Vue sur six mois','Revenus et dépenses mensuels, chiffres réels du tableau de bord')}
+ <details class="advanced-overview"><summary>Voir mon analyse détaillée <span>⌄</span></summary><div class="dash-grid"><section class="panel">${sectionTitle('Vue sur six mois','Revenus et dépenses mensuels, chiffres réels du tableau de bord')}
  <div class="panel-body">${barChart()}</div></section><section class="panel">${sectionTitle('Où part ton argent ?','Catégories les plus coûteuses en '+monthLabel(state.month))}<div class="panel-body">${categoryRows()}</div></section>
  <section class="panel">${sectionTitle('Dernières opérations','Les mouvements enregistrés pour ce mois',`<button class="btn small" data-route="transactions">Tout voir ↗</button>`)}<div class="panel-body">${transactionRows(byDateDesc(monthTransactions()).slice(0,6))}</div></section>
- <section class="panel">${sectionTitle('Ton radar d’économies','Des pistes, jamais des coupes automatiques',`<button class="btn small soft" data-route="cuts">Analyser ↗</button>`)}<div class="panel-body">${overviewInsights(s,topCat,yearNet)}</div></section></div>`;
+ <section class="panel">${sectionTitle('Ton radar d’économies','Des pistes, jamais des coupes automatiques',`<button class="btn small soft" data-route="cuts">Analyser ↗</button>`)}<div class="panel-body">${overviewInsights(s,topCat,yearNet)}</div></section></div></details>`;
 }
 function overviewInsights(s,topCat,yearNet){let data=[];if(topCat)data.push({icon:'◈',title:`Premier poste : ${topCat[0]}`,detail:`${money(topCat[1])} dépensés ce mois. Vérifie sa nécessité avant de couper.`});
  if(s.income>0)data.push({icon:'◎',title:s.net>=state.data.goal?'Objectif mensuel atteint':'Objectif à surveiller',detail:`${money(Math.max(0,state.data.goal-s.net))} manquants pour atteindre ${money(state.data.goal)} ce mois, à ce stade.`});
@@ -107,7 +113,7 @@ function renderTransactions(){const query=state.filterQuery.toLocaleLowerCase('f
  <div class="panel"><div class="panel-body" id="transactionsList">${transactionRows(rows,true)}</div></div><p class="hint">Les virements internes sont exclus du calcul des revenus et dépenses pour éviter les doubles comptes.</p>`;
 }
 function renderBills(){const bills=[...state.data.bills].sort((a,b)=>monthlyEquivalent(b)-monthlyEquivalent(a));const total=monthlyBills(), nonessential=bills.filter(b=>!b.essential),potential=nonessential.reduce((a,b)=>a+monthlyEquivalent(b),0);
- return `${pageHead('CHARGES RÉCURRENTES','Factures & abonnements','Anticipe tes charges fixes et identifie ce qui mérite d’être renégocié.',`<button class="btn primary" data-action="new-bill">＋ Ajouter une charge</button>`)}${state.source==='demo'?demoBanner():''}
+ return `${pageHead('CHARGES RÉCURRENTES','Factures & abonnements','Anticipe tes charges fixes et identifie ce qui mérite d’être renégocié.',`<button class="btn primary" data-action="bulk-bills">＋ Ajouter toute ma liste</button><button class="btn" data-action="new-bill">Ajouter une charge</button>`)}${state.source==='demo'?demoBanner():''}
  <div class="bill-grid"><div class="bill-stat"><span>Charges récurrentes / mois</span><strong class="mono">${money(total)}</strong></div><div class="bill-stat"><span>Coût annuel estimé</span><strong class="mono">${money(total*12)}</strong></div><div class="bill-stat"><span>Charges facultatives / mois</span><strong class="mono metric-positive">${money(potential)}</strong></div></div>
  <div class="panel">${sectionTitle('Tes engagements','Le mensuel équivalent permet de comparer les abonnements annuels et trimestriels')}
  <div class="table-scroll"><table class="data-table"><thead><tr><th>Charge</th><th>Fréquence</th><th>Type</th><th class="right">Par mois</th><th class="right">Action</th></tr></thead><tbody>${bills.length?bills.map(b=>`<tr><td><strong>${escapeHtml(b.name)}</strong><div class="muted" style="font-size:10px">${escapeHtml(b.category)}</div></td><td>${billCycleLabel(b.cycle)}</td><td>${miniBadge(b.essential?'Essentiel':'À vérifier',b.essential?'':'warning')}</td><td class="right mono strong">${money(monthlyEquivalent(b))}</td><td class="right"><button class="btn small" data-action="edit-bill" data-id="${b.id}">Modifier</button></td></tr>`).join(''):`<tr><td colspan="5">${noData('Aucune charge récurrente','Ajoute ton loyer, abonnements, assurances, etc.','▤')}</td></tr>`}</tbody></table></div></div>
@@ -207,6 +213,55 @@ function camtTransactions(xml){const doc=new DOMParser().parseFromString(xml,'ap
  }
  return result;
 }
+
+function showBulkBills(){
+ if(state.source!=='vault'){openCreateVault();return;}
+ const previous=state.bulkText||'';
+ openModal('Ajouter toutes mes charges en une fois',`<p class="hint">Copie ta liste ici, une dépense par ligne. Pour les montants annuels, écris simplement <strong>/an</strong>. Sans précision, c’est <strong>/mois</strong>.</p>
+ <form data-form="bulk-bills"><div class="form-field"><label for="bulkLines">Mes charges fixes et domiciliations</label><textarea id="bulkLines" name="lines" rows="11" required placeholder="Loyer : 750 €/mois&#10;Électricité : 85 €/mois&#10;Assurance voiture : 600 €/an&#10;Netflix : 15,99 €/mois">${escapeHtml(previous)</textarea></div>
+ <div class="security-list">🔒 La liste est traitée sur ton appareil. Tu vérifies tout avant l’enregistrement dans ton coffre chiffré. N’inclus aucun IBAN ni numéro de carte.</div>${actionButtons('Vérifier ma liste →')</form>`);
+}
+function parseBulkBills(raw){
+ const lines=String(raw).split(/\r?\n/).map(x=>x.trim()).filter(Boolean),found=[],errors=[];
+ if(lines.length>500)throw Error('Maximum 500 charges par import.');
+ for(let i=0;i<lines.length;i++){
+  const line=lines[i].replace(/^[\-•*]\s*/,'').trim();
+  const match=line.match(/^(.*?)\s*(?:[:|;=\-]\s*|\s+)(\d[\d \u00a0.,]*)\s*(?:€|euros?|EUR)?\s*(?:\/\s*|par\s+|\|\s*|\s+)?(mois|mensuel(?:le)?|ans?|annuel(?:le)?|ann[ée]e|trimestre|trimestriel(?:le)?)?\s*$/i);
+  if(!match){errors.push(i+1);continue;}
+  const name=match[1].trim(),amount=parseCurrency(match[2]),freq=(match[3]||'mois').toLowerCase();
+  if(!name||name.length>120||!Number.isFinite(amount)||amount<=0||amount>1e7){errors.push(i+1);continue;}
+  const plain=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(/\b(salaire|revenu|paie|remuneration)\b/.test(plain)){errors.push(i+1);continue;}
+  const cycle=/^an|^ann/.test(freq)?'year':/^trim/.test(freq)?'quarter':'month';
+  let category=detectCategory(name,-amount);
+  if(category==='Divers'&&/assurance.*(auto|voiture)|leasing|credit voiture|credit auto|taxe auto/.test(plain))category='Transport';
+  if(category==='Divers'&&/mutuelle|assurance sante/.test(plain))category='Santé';
+  const optional=/netflix|spotify|disney|prime video|youtube premium|apple music|salle de sport|basic.fit|abonnement streaming|canal\+/.test(plain);
+  found.push({name,amount,cycle,category,essential:!optional});
+ }
+ if(!found.length)throw Error('Aucune charge reconnue. Exemple : Loyer : 750 €/mois');
+ if(errors.length)throw Error('Ligne(s) '+errors.slice(0,8).join(', ')+' à corriger. Format : Nom : 50 €/mois');
+ return found;
+}
+function showBulkPreview(){
+ const rows=state.bulkDraft||[];
+ const sum=rows.reduce((a,b)=>a+monthlyEquivalent(b),0);
+ const table=rows.map(b=>`<tr><td>${escapeHtml(b.name)</td><td class="right">${money(b.amount)}</td><td>${billCycleLabel(b.cycle)}</td></tr>`).join('');
+ openModal('Vérifie tes charges',`<p class="hint"><strong>${rows.length} lignes reconnues</strong> · ${money(sum)} de charges mensuelles estimées. Les charges déjà présentes seront mises à jour, pas doublées.</p><div class="import-preview"><table><thead><tr><th>Charge</th><th>Montant</th><th>Fréquence</th></tr></thead><tbody>${table}</tbody></table></div><p class="hint">Ces montants servent à prévoir tes frais. Ils ne seront pas comptés une deuxième fois dans tes opérations bancaires.</p><form data-form="bulk-confirm">${actionButtons('Enregistrer toutes les charges')}</form><button type="button" class="btn soft" data-action="bulk-bills">← Corriger ma liste</button>`);
+}
+function saveBulkBills(){
+ if(state.source!=='vault'||!state.bulkDraft?.length)throw Error('Import indisponible');
+ let created=0,updated=0,unchanged=0;
+ for(const bill of state.bulkDraft){
+  const existing=state.data.bills.find(x=>canon(x.name)===canon(bill.name)&&x.cycle===bill.cycle);
+  if(existing){if(existing.amount===bill.amount){unchanged++;continue;}existing.amount=bill.amount;existing.category=bill.category;updated++;}
+  else {state.data.bills.push({id:uid(),...bill});created++;}
+ }
+ state.bulkDraft=null;state.bulkText='';
+ updateData();closeModal();route('bills');
+ toast(${created} ajoutée(s), ${updated} mise(s) à jour${unchanged?', '+unchanged+' déjà enregistrée(s)':''});
+}
+
 function importStart(){if(state.source!=='vault'){openCreateVault();return;}openModal('Importer un relevé bancaire',`<p class="hint">Ton fichier reste sur cet appareil. Les formats <strong>CSV</strong> et <strong>CAMT.053 XML</strong> sont pris en charge ; aucune connexion bancaire n’est requise.</p><form data-form="import-file">${inputField('Relevé bancaire','bankFile','','file',true)}<div class="security-list">🔒 Les relevés sont analysés exclusivement dans ton navigateur. L’aperçu te permettra de contrôler les colonnes et le sens des montants AVANT d’enregistrer.</div>${actionButtons('Analyser ce fichier')}</form>`);$('#f_bankFile').accept='.csv,.txt,.xml,.camt,text/csv,text/xml,application/xml';}
 async function parseBankFile(file){if(file.size>18*1024*1024)throw Error('Fichier trop volumineux (maximum 18 Mo)');const text=await readTextFile(file);const xml=file.name.toLowerCase().match(/\.(xml|camt)$/)||text.trimStart().startsWith('<?xml');if(xml){const tx=camtTransactions(text);if(!tx.length)throw Error('Aucune opération CAMT.053 reconnue');state.importInfo={type:'xml',name:file.name,transactions:tx};renderImportPreview();return;}
  const sep=autoDelimiter(text),rows=csvParse(text,sep);if(rows.length<2)throw Error('Fichier CSV vide ou mal structuré');if(rows.length>35000)throw Error('Trop de lignes : exporte une période plus courte');const headers=rows.shift().map((v,i)=>v.trim()||'Colonne '+(i+1)),map=guessColumns(headers);state.importInfo={type:'csv',name:file.name,headers,rows,map,sep};renderImportPreview();}
@@ -230,7 +285,9 @@ async function handleSubmit(event){const form=event.target.closest('form[data-fo
   if(kind==='create-vault'){const pass=form.elements.password.value,confirmPass=form.elements.confirmation.value;if(pass.length<12)throw Error('Utilise une phrase secrète d’au moins 12 caractères');if(pass!==confirmPass)throw Error('Les deux mots de passe ne correspondent pas');if(!state.db)throw Error('Le stockage local privé est indisponible');if(await idbGet(state.db,'finances'))throw Error('Un coffre existe déjà : déverrouille-le');await setupVault(pass);closeModal();}
   if(kind==='unlock'){await unlockVault(form.elements.password.value);closeModal();}
   if(kind==='transaction'){const amount=Number(form.elements.amount.value),date=form.elements.date.value,name=form.elements.name.value.trim(),category=form.elements.category.value;if(!validDate(date))throw Error('Date invalide');if(!name||!Number.isFinite(amount)||amount===0)throw Error('Ajoute un libellé et un montant non nul');const prior=state.data.transactions.find(x=>x.id===id);const tx={id:prior?.id||uid(),date,name,category,amount:validMoney(amount),source:prior?.source||'Manuel',...(prior?.fingerprint?{fingerprint:prior.fingerprint}:{})};if(prior)Object.assign(prior,tx);else state.data.transactions.push(tx);updateData();closeModal();toast('Transaction enregistrée');}
-  if(kind==='bill'){const amount=Number(form.elements.amount.value),name=form.elements.name.value.trim();if(!name||!Number.isFinite(amount)||amount<=0)throw Error('Montant de charge incorrect');const prior=state.data.bills.find(x=>x.id===id);const bill={id:prior?.id||uid(),name,amount:validMoney(amount),cycle:form.elements.cycle.value,category:form.elements.category.value,essential:form.elements.essential.value==='yes'};if(prior)Object.assign(prior,bill);else state.data.bills.push(bill);updateData();closeModal();toast('Charge enregistrée');}
+  if(kind==='bulk-bills'){state.bulkText=form.elements.lines.value;state.bulkDraft=parseBulkBills(state.bulkText);showBulkPreview();}
+   if(kind==='bulk-confirm'){saveBulkBills();}
+   if(kind==='bill'){const amount=Number(form.elements.amount.value),name=form.elements.name.value.trim();if(!name||!Number.isFinite(amount)||amount<=0)throw Error('Montant de charge incorrect');const prior=state.data.bills.find(x=>x.id===id);const bill={id:prior?.id||uid(),name,amount:validMoney(amount),cycle:form.elements.cycle.value,category:form.elements.category.value,essential:form.elements.essential.value==='yes'};if(prior)Object.assign(prior,bill);else state.data.bills.push(bill);updateData();closeModal();toast('Charge enregistrée');}
   if(kind==='budgets'){const goal=Number(form.elements.goal.value);if(!Number.isFinite(goal)||goal<0)throw Error('Objectif invalide');state.data.goal=validMoney(goal);for(const c of BUDGET_CATS){const val=Number(form.elements['b_'+c].value);if(!Number.isFinite(val)||val<0)throw Error('Budget invalide pour '+c);state.data.budgets[c]=validMoney(val);}updateData();closeModal();toast('Budgets mis à jour');}
   if(kind==='import-file'){const file=form.elements.bankFile.files[0];if(!file)throw Error('Sélectionne un fichier CSV ou XML');await parseBankFile(file);}
   if(kind==='import-confirm'){if(!state.importInfo)throw Error('Aucun fichier prêt');const formObj={};for(const [k,v] of new FormData(form).entries())formObj[k]=v;const entries=bankMappedTransactions(state.importInfo,formObj);if(!entries.length)throw Error('Aucune transaction valide. Contrôle le format de la date et les colonnes.');if(entries.length>10000&&!confirm(`Importer ${entries.length} transactions ?`))return;importBankRows(entries);}
@@ -247,6 +304,7 @@ async function handleClick(event){const routeTarget=event.target.closest('[data-
  if(action==='new-transaction'){showTransaction();return;}
  if(action==='edit-transaction'){showTransaction(id);return;}
  if(action==='new-bill'){showBill();return;}
+  if(action==='bulk-bills'){showBulkBills();return;}
  if(action==='edit-bill'){showBill(id);return;}
  if(action==='edit-budgets'){if(state.source==='vault')showBudgets();else openCreateVault();return;}
  if(action==='open-import'){importStart();return;}
