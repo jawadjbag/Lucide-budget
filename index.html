@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'self'; manifest-src 'self'" />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="theme-color" content="#151c2b" />
+  <meta name="description" content="Lucide Budget : comprends tes dépenses, repère les fuites et organise tes économies." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Lucide" />
+  <title>Lucide — Mon argent, sans flou</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><div class="brand-icon"><span>↗</span></div><div><strong>lucide<span class="brand-dot">.</span></strong><small>MON ARGENT, SANS FLOU</small></div></div>
+      <div class="nav-kicker">ESPACE PERSONNEL</div>
+      <nav class="nav" id="sideNav" aria-label="Navigation principale">
+        <button class="nav-button active" data-route="overview"><span class="nav-glyph">◫</span> Vue d'ensemble</button>
+        <button class="nav-button" data-route="transactions"><span class="nav-glyph">⇄</span> Transactions</button>
+        <button class="nav-button" data-route="bills"><span class="nav-glyph">▤</span> Factures & abonnements</button>
+        <button class="nav-button" data-route="cuts"><span class="nav-glyph">✂</span> Plan d'économies</button>
+        <button class="nav-button" data-route="budgets"><span class="nav-glyph">◎</span> Mes budgets</button>
+      </nav>
+      <div class="side-bottom">
+        <div class="side-quote"><span>✳</span><strong>La clarté avant les économies.</strong><p>Prends de meilleures décisions avec tes vrais chiffres.</p></div>
+        <button class="nav-button settings-nav" data-route="settings"><span class="nav-glyph">⚙</span> Paramètres</button>
+        <span class="side-credit">Données conservées sur cet appareil</span>
+      </div>
+    </aside>
+    <div class="app-area">
+      <header class="topbar">
+        <div class="topbar-left"><span class="top-crumb">Mon espace</span><span class="crumb-slash">/</span><strong id="crumbCurrent">Vue d'ensemble</strong></div>
+        <div class="topbar-right"><span class="offline-badge"><span class="privacy-dot"></span> 100 % local</span><div class="avatar">M</div></div>
+      </header>
+      <main class="page" id="app" tabindex="-1"></main>
+    </div>
+  </div>
+  <nav class="bottom-nav" aria-label="Navigation mobile">
+    <button data-route="overview" class="active"><span>◫</span><small>Accueil</small></button>
+    <button data-route="transactions"><span>⇄</span><small>Dépenses</small></button>
+    <button data-route="bills"><span>▤</span><small>Factures</small></button>
+    <button data-route="cuts"><span>✂</span><small>Cuts</small></button>
+    <button data-route="budgets"><span>◎</span><small>Budgets</small></button>
+  </nav>
+  <dialog id="modal" aria-label="Formulaire"><div id="modalContent"></div></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>
