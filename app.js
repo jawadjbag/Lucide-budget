@@ -157,7 +157,7 @@ function renderOverview(){
   </section>
   <div class="simple-shortcuts">
     <button class="simple-shortcut" data-route="bills"><span>▤</span><strong>Mes factures</strong><small>${state.data.bills.length} charge(s)</small><b>→</b></button>
-    <button class="simple-shortcut" data-action="simple-outings"><span>🍽</span><strong>Restos & Uber Eats</strong><small>${(Number(o.restCount)||0)+(Number(o.uberCount)||0)} sortie(s) / mois</small><b>→</b></button>
+    <button class="simple-shortcut" data-action="simple-outings"><span>🍽</span><strong>Restaurants & livraisons</strong><small>${(Number(o.restCount)||0)+(Number(o.uberCount)||0)} sortie(s) / mois</small><b>→</b></button>
   </div>
   <p class="simple-disclaimer">Budget provisoire (courses et autres dépenses encore à compléter), pas le solde en temps réel de ta banque. Les charges récurrentes et dépenses bancaires sont rapprochées de façon indicative pour limiter les doublons. ${Number(d.mealVouchers)>0?`Chèques-repas : environ ${money(d.mealVouchers)}/mois, non inclus dans le revenu disponible.`:''}</p>
  </section>`;
