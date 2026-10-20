@@ -12,6 +12,7 @@ const ROUTES={overview:'Vue d’ensemble',transactions:'Transactions',bills:'Fac
 const DEFAULT_BUDGETS={Courses:400,Restaurants:180,Transport:180,Shopping:120,Abonnements:100,Santé:80,Loisirs:100,Divers:100};
 const state={route:'overview',source:'demo',data:null,key:null,salt:null,db:null,month:'',filterCat:'',filterQuery:'',importInfo:null,cutPct:25,storageStatus:'',saving:false};
 let saveQueue=Promise.resolve(), toastTimer=null;
+state.pendingSetup=null;
 const escapeHtml=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=x=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(x)||0);
 const shortMoney=x=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(x)||0);
@@ -76,7 +77,7 @@ function toast(msg){const node=$('#toast');node.textContent=msg;node.classList.a
 function sectionTitle(title,desc,action=''){return `<div class="panel-header"><div><h2 class="panel-title">${title}</h2><p class="panel-desc">${desc}</p></div>${action}</div>`;}
 function noData(title,desc,glyph='◌'){return `<div class="empty"><span>${glyph}</span><strong>${title}</strong><p>${desc}</p></div>`;}
 function miniBadge(txt,style=''){return `<span class="badge ${style}">${txt}</span>`;}
-function demoBanner(){return `<div class="demo-banner"><span>✳</span><div><strong>Mode démonstration — aucun chiffre n'est réel</strong><p>Ces montants fictifs te montrent ce que l'application pourra analyser. Crée ton coffre chiffré pour commencer avec tes propres données.</p></div><button class="btn primary small" data-action="create-vault">Créer mon coffre privé →</button></div>`;}
+function demoBanner(){return `<div class="demo-banner"><span>✳</span><div><strong>Budget non configuré</strong><p>Aucun montant n'est encore enregistré sur cet appareil.</p></div><button class="btn primary small" data-action="setup-import">Importer mon budget →</button></div>`;}
 function monthSwitch(){return `<div class="month-switch"><button data-action="month-prev" aria-label="Mois précédent">‹</button><strong>${escapeHtml(monthLabel(state.month))}</strong><button data-action="month-next" aria-label="Mois suivant" ${state.month>=monthId(nowIso())?'disabled':''}>›</button></div>`;}
 function pageHead(kicker,title,description,buttons=''){return `<div class="heading-row"><div><p class="eyebrow">${kicker}</p><h1 class="page-title">${title}</h1><p class="subtitle">${description}</p></div><div class="heading-actions">${buttons}</div></div>`;}
 function statsCard(label,value,note,icon,cls=''){return `<div class="stat-card"><div class="stat-top"><span class="label">${label}</span><span class="stat-ico ${cls}">${icon}</span></div><strong class="stat-value mono ${cls==='red'?'metric-negative':cls==='green'?'metric-positive':''}">${value}</strong><p class="stat-desc">${note}</p></div>`;}
@@ -111,7 +112,17 @@ function simpleRing(b){
  return `<div class="simple-ring" style="background:${gradient}" role="img" aria-label="Diagramme des dépenses mensuelles estimées et de l’argent disponible"><div class="simple-ring-center"><small>Reste prévu</small><strong>${b.income?shortMoney(b.remaining):'—'}</strong></div></div>`;
 }
 
+function renderDemoOnboarding(){
+ return `<section class="simple-home">
+ <header class="simple-heading"><div><p class="eyebrow">MON BUDGET</p><h1>Ton budget, sans chiffres inventés.</h1><p>Aucune donnée personnelle n’est encore enregistrée sur cet appareil.</p></div></header>
+ <div class="setup-intro"><span class="setup-intro-icon">↗</span><h2>Configurons ton vrai budget</h2><p>Importe les montants préparés pour toi, en une seule fois. Ils seront ensuite chiffrés sur cet appareil.</p>
+ <button class="simple-add dark full" data-action="setup-import">↓ Importer mon budget</button>
+ <button class="simple-secondary-cta" data-action="create-vault">Ou commencer un budget vide</button></div>
+ <p class="simple-disclaimer">Aucun salaire ou frais fictif n’est utilisé. Les données ne sont pas publiées sur GitHub.</p>
+ </section>`;
+}
 function renderOverview(){
+ if(state.source==='demo')return renderDemoOnboarding();
  const b=computeSimple(),d=state.data,o=d.outings||{};
  const known=b.income>0,neg=b.remaining<0, source=state.source==='demo';
  const cls=neg?'is-negative':'';
@@ -121,7 +132,7 @@ function renderOverview(){
    {label:'Revenu du mois',value:known?money(b.income):'À renseigner',caption:b.incomeConfigured?'Montant mensuel de référence':'Revenus enregistrés',icon:'↗'},
    {label:'Dépenses prévues',value:money(b.expenses),caption:'Charges + sorties + extras',icon:'↘'},
    {label:'Reste disponible',value:known?money(b.remaining):'—',caption:'Revenu – dépenses prévues',icon:'◎',warn:neg},
-   {label:'Épargne possible',value:known?money(b.savings):'—',caption:b.cushion?`${money(b.cushion)} gardés pour imprévus`:'Maximum théorique avant imprévus',icon:'✦'}
+   {label:'Épargne maximale théorique',value:known?money(b.savings):'—',caption:'Avant courses, transport et imprévus',icon:'✦'}
  ];
  const statsMarkup=stats.map(t=>`<article class="simple-metric ${t.warn?'negative':''}"><div class="metric-head"><span>${t.icon}</span><small>${t.label}</small></div><strong>${t.value}</strong><p>${t.caption}</p></article>`).join('');
  return `<section class="simple-home">
@@ -148,7 +159,7 @@ function renderOverview(){
     <button class="simple-shortcut" data-route="bills"><span>▤</span><strong>Mes factures</strong><small>${state.data.bills.length} charge(s)</small><b>→</b></button>
     <button class="simple-shortcut" data-action="simple-outings"><span>🍽</span><strong>Restos & Uber Eats</strong><small>${(Number(o.restCount)||0)+(Number(o.uberCount)||0)} sortie(s) / mois</small><b>→</b></button>
   </div>
-  <p class="simple-disclaimer">Budget estimatif, pas le solde en temps réel de ta banque. Les charges récurrentes et dépenses bancaires sont rapprochées de façon indicative pour limiter les doublons. ${Number(d.mealVouchers)>0?`Chèques-repas : environ ${money(d.mealVouchers)}/mois, non inclus dans le revenu disponible.`:''}</p>
+  <p class="simple-disclaimer">Budget provisoire (courses et autres dépenses encore à compléter), pas le solde en temps réel de ta banque. Les charges récurrentes et dépenses bancaires sont rapprochées de façon indicative pour limiter les doublons. ${Number(d.mealVouchers)>0?`Chèques-repas : environ ${money(d.mealVouchers)}/mois, non inclus dans le revenu disponible.`:''}</p>
  </section>`;
 }
 function overviewInsights(s,topCat,yearNet){let data=[];if(topCat)data.push({icon:'◈',title:`Premier poste : ${topCat[0]}`,detail:`${money(topCat[1])} dépensés ce mois. Vérifie sa nécessité avant de couper.`});
@@ -219,8 +230,8 @@ function showSimpleOutings(){
  const o=state.data.outings||{};
  openModal('Restos & commandes',`<p class="hint">Indique environ combien de fois par mois tu manges dehors et commandes. Tu pourras modifier ces estimations plus tard.</p>
  <form data-form="simple-outings">
- <div class="two-col">${inputField('Restos / mois','restCount',o.restCount||0,'number',true)}${inputField('Prix moyen par resto (€)','restAverage',o.restAverage||0,'number',true)}</div>
- <div class="two-col">${inputField('Uber Eats / mois','uberCount',o.uberCount||0,'number',true)}${inputField('Prix moyen par commande (€)','uberAverage',o.uberAverage||0,'number',true)}</div>
+ <div class="two-col">${inputField('Restos / mois (2,17 ≈ toutes les 2 semaines)','restCount',o.restCount?Number(o.restCount).toFixed(2):0,'number',true)}${inputField('Prix moyen par resto (€)','restAverage',o.restAverage||0,'number',true)}</div>
+ <div class="two-col">${inputField('Commandes au total / mois','uberCount',o.uberCount||0,'number',true)}${inputField('Prix moyen par commande (€)','uberAverage',o.uberAverage||0,'number',true)}</div>
  ${actionButtons('Enregistrer')}</form>`);
 }
 
@@ -246,7 +257,7 @@ function handleSimpleForm(form,kind){
  }
  if(kind==='simple-outings'){
   const restaurantCount=nonneg('restCount',100),uberCount=nonneg('uberCount',100),restaurantAverage=nonneg('restAverage'),uberAverage=nonneg('uberAverage');
-  if(!Number.isInteger(restaurantCount)||!Number.isInteger(uberCount))throw Error('Indique un nombre entier de sorties et commandes');
+  if(!Number.isInteger(uberCount))throw Error('Indique un nombre entier de commandes');
   state.data.outings={restCount:restaurantCount,restAverage:restaurantAverage,uberCount,uberAverage};
   updateData();closeModal();toast('Ton budget sorties est mis à jour');return;
  }
@@ -278,7 +289,7 @@ function openCreateVault(){if(state.source==='vault'){toast('Un coffre est déj�
  openModal('Créer mon coffre chiffré',`<p class="hint">Cette opération crée un espace de données RÉEL, vide et indépendant de la démonstration. Rien n’est envoyé sur Internet.</p><div class="security-list">🔒 AES-GCM 256 bits · mot de passe non enregistré · sauvegarde chiffrée exportable. <strong>Si tu perds ton mot de passe, il n’y a aucune récupération possible.</strong></div>
  <form data-form="create-vault">${inputField('Mot de passe principal (12 caractères minimum)','password','','password',true,'Phrase secrète longue et unique')}${inputField('Confirmer le mot de passe','confirmation','','password',true,'Répéter la phrase')}${actionButtons('Créer mon espace privé')}</form>`);
 }
-function lockScreen(){return `<div class="lock-screen"><div class="lock-card"><div class="lock-logo">♙</div><p class="eyebrow">ESPACE PERSONNEL PROTÉGÉ</p><h1>Reprends le contrôle de ton argent.</h1><p>Tes données sont chiffrées sur cet appareil. Renseigne ton mot de passe pour y accéder.</p><form data-form="unlock">${inputField('Mot de passe principal','password','','password',true,'Ta phrase secrète')}${actionButtons('Déverrouiller le coffre')}</form><div class="security-list">🔐 Aucun envoi de mot de passe ou de relevé bancaire. Une fois déverrouillé, toutes les analyses sont réalisées localement.</div><div class="lock-actions"><button class="btn small" data-action="import-backup">↥ Restaurer une sauvegarde</button><button class="btn small soft" data-action="demo-mode">Voir la démonstration</button></div></div></div>`;}
+function lockScreen(){return `<div class="lock-screen"><div class="lock-card"><div class="lock-logo">♙</div><p class="eyebrow">ESPACE PERSONNEL PROTÉGÉ</p><h1>Reprends le contrôle de ton argent.</h1><p>Tes données sont chiffrées sur cet appareil. Renseigne ton mot de passe pour y accéder.</p><form data-form="unlock">${inputField('Mot de passe principal','password','','password',true,'Ta phrase secrète')}${actionButtons('Déverrouiller le coffre')}</form><div class="security-list">🔐 Aucun envoi de mot de passe ou de relevé bancaire. Une fois déverrouillé, toutes les analyses sont réalisées localement.</div><div class="lock-actions"><button class="btn small" data-action="import-backup">↥ Restaurer une sauvegarde</button><button class="btn small soft" data-action="demo-mode">Revenir à l’accueil sans données</button></div></div></div>`;}
 function render(){ $$('.nav-button,.bottom-nav button').forEach(button=>button.classList.toggle('active',button.dataset.route===state.route));$('#crumbCurrent').textContent=ROUTES[state.route]||'Vue d’ensemble';if(state.source==='locked'){$('#app').innerHTML=lockScreen();return;}
  const views={overview:renderOverview,transactions:renderTransactions,bills:renderBills,cuts:renderCuts,budgets:renderBudgets,settings:renderSettings};$('#app').innerHTML=(views[state.route]||renderOverview)();$('#app').setAttribute('aria-label',ROUTES[state.route]);
 }
@@ -308,7 +319,7 @@ async function changePassword(oldPass,newPass){const env=await idbGet(state.db,'
 function showChangePassword(){openModal('Changer le mot de passe',`<form data-form="change-password">${inputField('Mot de passe actuel','oldPassword','','password',true)}${inputField('Nouveau mot de passe (12 caractères minimum)','password','','password',true)}${inputField('Confirmer le nouveau','confirmation','','password',true)}<p class="hint">Tes anciens fichiers de sauvegarde garderont leur ancien mot de passe.</p>${actionButtons('Modifier le mot de passe')}</form>`);}
 async function restoreBackupFile(file,password){if(file.size>60*1024*1024)throw Error('Fichier trop volumineux');const env=JSON.parse(await file.text());const unlocked=await decrypt(env,password);if(!confirm('Remplacer le coffre actuel de cet appareil par cette sauvegarde ? Cette action est irréversible sans sauvegarde de l’ancien coffre.'))return;await saveQueue;await idbSet(state.db,'finances',env);state.key=unlocked.key;state.salt=unlocked.salt;state.data=unlocked.data;state.source='vault';state.month=monthId(nowIso());closeModal();render();toast('Coffre chiffré restauré');}
 function restoreBackupPrompt(){openModal('Restaurer une sauvegarde',`<p class="hint">Sélectionne ton fichier .lucide. Le mot de passe de cette sauvegarde est indispensable.</p><form data-form="restore">${inputField('Fichier de sauvegarde','backupFile','','file',true)}${inputField('Mot de passe de la sauvegarde','password','','password',true)}${actionButtons('Vérifier et restaurer')}</form>`);$('#f_backupFile').accept='.lucide,.json,application/json';}
-async function startup(){state.month=monthId(nowIso());state.data=buildDemo();render();try{state.db=await openDb();const env=await idbGet(state.db,'finances');if(env){state.source='locked';state.data=null;render();}}catch(e){toast('Stockage local indisponible : seules les données fictives sont accessibles');}}
+async function startup(){state.month=monthId(nowIso());state.data=emptyData();render();try{state.db=await openDb();const env=await idbGet(state.db,'finances');if(env){state.source='locked';state.data=null;render();}}catch(e){toast('Stockage local indisponible : les données ne peuvent pas être enregistrées');}}
 function detectCategory(name,amount){if(amount>0)return 'Revenus';const s=String(name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');if(/virement interne|transfert entre|eigen rekening|own account|sparen|spaarrekening/.test(s))return 'Virement interne';if(/loyer|huur|hypothe|energie|electric|gaz|eau|water|woning|assurance habitation/.test(s))return 'Logement';if(/delhaize|colruyt|carrefour|aldi|lidl|supermarch|supermarkt|okay |intermarche|proxy/.test(s))return 'Courses';if(/restaurant|snack|frituur|uber eats|deliveroo|takeaway|pizza|mcdonald|burger|kfc |starbucks|coffee|cafe |bar /.test(s))return 'Restaurants';if(/netflix|spotify|youtube premium|icloud|cloud storage|disney\+|prime video|abonnement|subscription|orange|proximus|telenet|basic fit|basic-fit/.test(s))return 'Abonnements';if(/essence|shell|totalenergies|q8|carburant|sncb|nmbs|metro|bus |parking|mobilite|train/.test(s))return 'Transport';if(/amazon|zalando|shein|zara|hm |h&m|ikea|shop|boutique|shopping|bol.com/.test(s))return 'Shopping';if(/pharma|medic|dent|hopital|ziekenhuis|apotheek/.test(s))return 'Santé';if(/cinema|cinem|concert|sport|loisir|game|theatre/.test(s))return 'Loisirs';return 'Divers';}
 function parseCurrency(raw){if(typeof raw==='number')return validMoney(raw);let s=String(raw??'').trim().replace(/\u00a0/g,'').replace(/[€$£]|\bEUR\b/gi,'').replace(/\s/g,'');const negative=/^[-−]/.test(s)||/^\(.*\)$/.test(s);s=s.replace(/[()]/g,'').replace(/−/g,'-').replace(/[^\d,.\-+]/g,'');const comma=s.lastIndexOf(','),dot=s.lastIndexOf('.');if(comma>=0 && dot>=0){const sep=Math.max(comma,dot);s=s.slice(0,sep).replace(/[.,]/g,'')+'.'+s.slice(sep+1);}else if(comma>=0){if(s.length-comma-1===3 && !s.includes('.') && s.split(',').length===2)s=s.replace(',','');else s=s.replace(/\./g,'').replace(',','.');}else if(dot>=0 && s.length-dot-1===3 && s.split('.').length===2)s=s.replace('.','');const num=parseFloat(s);return Number.isFinite(num)?validMoney(negative?-Math.abs(num):num):NaN;}
 function normalizeDate(raw){const v=String(raw||'').trim();if(/^\d{4}-\d{2}-\d{2}/.test(v))return v.slice(0,10);let m=v.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})/);if(m)return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;if(/^\d{5}$/.test(v)){const base=new Date(Date.UTC(1899,11,30));base.setUTCDate(base.getUTCDate()+Number(v));return base.toISOString().slice(0,10)}return '';}
@@ -431,10 +442,10 @@ async function handleClick(event){const routeTarget=event.target.closest('[data-
  if(action==='import-backup'){restoreBackupPrompt();return;}
  if(action==='change-password'){showChangePassword();return;}
  if(action==='lock'){await saveQueue;state.key=null;state.salt=null;state.data=null;state.source='locked';state.route='overview';render();toast('Coffre verrouillé');return;}
- if(action==='demo-mode'){state.source='demo';state.key=null;state.salt=null;state.data=buildDemo();state.month=monthId(nowIso());state.route='overview';render();return;}
+ if(action==='demo-mode'){state.source='demo';state.key=null;state.salt=null;state.data=emptyData();state.month=monthId(nowIso());state.route='overview';render();return;}
  if(action==='delete-transaction'){if(!confirm('Supprimer définitivement cette transaction ?'))return;state.data.transactions=state.data.transactions.filter(x=>x.id!==id);updateData();closeModal();toast('Transaction supprimée');return;}
  if(action==='delete-bill'){if(!confirm('Supprimer définitivement cette charge ?'))return;state.data.bills=state.data.bills.filter(x=>x.id!==id);updateData();closeModal();toast('Charge supprimée');return;}
- if(action==='delete-vault'){const typed=prompt('Cette action efface toutes les finances stockées sur cet appareil. Tape exactement SUPPRIMER pour confirmer.');if(typed!=='SUPPRIMER')return;await saveQueue;await idbDelete(state.db,'finances');state.key=null;state.salt=null;state.data=buildDemo();state.source='demo';state.route='overview';render();toast('Coffre local effacé définitivement');return;}
+ if(action==='delete-vault'){const typed=prompt('Cette action efface toutes les finances stockées sur cet appareil. Tape exactement SUPPRIMER pour confirmer.');if(typed!=='SUPPRIMER')return;await saveQueue;await idbDelete(state.db,'finances');state.key=null;state.salt=null;state.data=emptyData();state.source='demo';state.route='overview';render();toast('Coffre local effacé définitivement');return;}
  }catch(err){toast('⚠ '+(err.message||'Action impossible'));}
 }
 function handleChange(event){const el=event.target;if(el.matches('[data-cut-key]')){if(state.source!=='vault'){toast('Ce scénario est fictif. Crée ton coffre pour enregistrer tes choix.');return;}const key=el.dataset.cutKey;state.data.cutDone=state.data.cutDone.filter(x=>x!==key);if(!el.checked)state.data.cutDone.push(key);updateData();}}
