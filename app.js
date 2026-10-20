@@ -116,7 +116,7 @@ function renderDemoOnboarding(){
  return `<section class="simple-home">
  <header class="simple-heading"><div><p class="eyebrow">MON BUDGET</p><h1>Ton budget, sans chiffres inventés.</h1><p>Aucune donnée personnelle n’est encore enregistrée sur cet appareil.</p></div></header>
  <div class="setup-intro"><span class="setup-intro-icon">↗</span><h2>Configurons ton vrai budget</h2><p>Importe les montants préparés pour toi, en une seule fois. Ils seront ensuite chiffrés sur cet appareil.</p>
- <button class="simple-add dark full" data-action="setup-import">↓ Importer mon budget</button>
+ <button class="simple-add dark full" data-action="load-prepared">✓ Charger mes chiffres déjà transmis</button><button class="simple-secondary-cta" data-action="setup-import">Ou importer un fichier JSON</button>
  <button class="simple-secondary-cta" data-action="create-vault">Ou commencer un budget vide</button></div>
  <p class="simple-disclaimer">Aucun salaire ou frais fictif n’est utilisé. Les données ne sont pas publiées sur GitHub.</p>
  </section>`;
@@ -155,7 +155,7 @@ function renderOverview(){
     </div>
    </div>
   </section>
-  <div class="simple-shortcuts">
+  <div class="simple-shortcuts"><button class="simple-shortcut" data-action="load-prepared"><span>↓</span><strong>Charger mes chiffres transmis</strong><small>13 frais, salaire, restos et livraisons</small><b>→</b></button>
     <button class="simple-shortcut" data-route="bills"><span>▤</span><strong>Mes factures</strong><small>${state.data.bills.length} charge(s)</small><b>→</b></button>
     <button class="simple-shortcut" data-action="simple-outings"><span>🍽</span><strong>Restaurants & livraisons</strong><small>${(Number(o.restCount)||0)+(Number(o.uberCount)||0)} sortie(s) / mois</small><b>→</b></button>
   </div>
@@ -213,6 +213,13 @@ function renderSettings(){return `${pageHead('CONFIDENTIALITÉ','Ton coffre priv
  <section class="panel">${sectionTitle('Sécurité','Gestion du coffre et de son mot de passe')}<div class="panel-body"><p class="hint">${state.source==='vault'?'Un coffre chiffré est actif sur cet appareil.':'Tu navigues avec des données fictives. Aucun document personnel n’est conservé.'}</p><div class="button-group top-gap">${state.source==='vault'?`<button class="btn" data-action="change-password">Changer le mot de passe</button><button class="btn danger" data-action="delete-vault">Effacer le coffre</button>`:`<button class="btn primary" data-action="create-vault">Créer un coffre privé</button>`}</div></div></section>
  <section class="panel">${sectionTitle('Import bancaire local','Formats pris en charge : CSV et CAMT.053 XML')}<div class="panel-body"><p class="hint">Les relevés PDF ne sont pas analysés automatiquement dans cette version. Exporte plutôt un CSV ou un fichier CAMT.053 depuis ta banque.</p><button class="btn soft" data-action="open-import">↥ Importer un relevé</button></div></section>
  <section class="panel">${sectionTitle('Application','PWA installable, même sans Internet')}<div class="panel-body"><p class="hint">Ouvre la PWA sur une adresse HTTPS, puis sur iPhone : Safari → Partager → Ajouter à l’écran d’accueil. La synchronisation entre appareils n’est pas activée : utilise une sauvegarde chiffrée pour changer d’appareil.</p><span class="badge positive">Aucun tracker · aucun compte externe</span></div></section></div><div class="top-gap">${settingsInfo()}</div>`;
+}
+const LUCIDE_PRESET={"format":"lucide-budget-setup","version":1,"monthlyIncome":2450.67,"mealVouchers":200,"cashCushion":0,"outings":{"restCount":2.1666666666666665,"restAverage":110,"uberCount":3,"uberAverage":35},"bills":[{"name":"Treft","amount":1067.17,"cycle":"month","category":"Logement","essential":true},{"name":"Luminus","amount":131,"cycle":"month","category":"Logement","essential":true},{"name":"Proximus Internet","amount":64.99,"cycle":"month","category":"Abonnements","essential":true},{"name":"Proximus Mobile","amount":16,"cycle":"month","category":"Abonnements","essential":true},{"name":"Zorgkas","amount":100,"cycle":"year","category":"Santé","essential":true},{"name":"SETCa","amount":19.5,"cycle":"month","category":"Abonnements","essential":true},{"name":"Watergroep","amount":218.26,"cycle":"quarter","category":"Logement","essential":true},{"name":"CapCut","amount":11.99,"cycle":"month","category":"Abonnements","essential":true},{"name":"iCloud+","amount":2.99,"cycle":"month","category":"Abonnements","essential":true},{"name":"Generation Association","amount":50,"cycle":"month","category":"Abonnements","essential":true},{"name":"Netflix","amount":16.99,"cycle":"month","category":"Abonnements","essential":true},{"name":"Boxe privée","amount":160,"cycle":"month","category":"Loisirs","essential":true},{"name":"Spotify","amount":19.99,"cycle":"month","category":"Abonnements","essential":true}]};
+function loadPreparedBudget(){
+ const preset=parseSetupFile(LUCIDE_PRESET);
+ if(state.source==='vault'){applySetupFile(preset).catch(e=>toast(e.message));return;}
+ state.pendingSetup=preset;
+ openCreateVault();
 }
 function showSetupImport(){
  openModal('Importer mon budget',`<p class="hint">Sélectionne le fichier <strong>lucide-mon-budget.json</strong> fourni dans la conversation. Tu n’as pas à saisir tes 13 frais un par un.</p>
@@ -476,6 +483,7 @@ async function handleClick(event){const routeTarget=event.target.closest('[data-
  if(action==='month-next'){state.month=previousMonth(state.month,1);render();return;}
  if(action==='create-vault'){openCreateVault();return;}
   if(action==='setup-import'){showSetupImport();return;}
+ if(action==='load-prepared'){loadPreparedBudget();return;}
  if(action==='simple-income'){showSimpleIncome();return;}
   if(action==='simple-outings'){showSimpleOutings();return;}
   if(action==='simple-expense'){showSimpleExpense();return;}
