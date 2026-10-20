@@ -214,6 +214,42 @@ function renderSettings(){return `${pageHead('CONFIDENTIALITÉ','Ton coffre priv
  <section class="panel">${sectionTitle('Import bancaire local','Formats pris en charge : CSV et CAMT.053 XML')}<div class="panel-body"><p class="hint">Les relevés PDF ne sont pas analysés automatiquement dans cette version. Exporte plutôt un CSV ou un fichier CAMT.053 depuis ta banque.</p><button class="btn soft" data-action="open-import">↥ Importer un relevé</button></div></section>
  <section class="panel">${sectionTitle('Application','PWA installable, même sans Internet')}<div class="panel-body"><p class="hint">Ouvre la PWA sur une adresse HTTPS, puis sur iPhone : Safari → Partager → Ajouter à l’écran d’accueil. La synchronisation entre appareils n’est pas activée : utilise une sauvegarde chiffrée pour changer d’appareil.</p><span class="badge positive">Aucun tracker · aucun compte externe</span></div></section></div><div class="top-gap">${settingsInfo()}</div>`;
 }
+function showSetupImport(){
+ openModal('Importer mon budget',`<p class="hint">Sélectionne le fichier <strong>lucide-mon-budget.json</strong> fourni dans la conversation. Tu n’as pas à saisir tes 13 frais un par un.</p>
+ <form data-form="setup-import"><div class="form-field"><label for="setupBudgetFile">Fichier de budget personnel</label>
+ <input id="setupBudgetFile" type="file" name="setupBudgetFile" accept=".json,application/json" required/></div>
+ <div class="security-list">🔒 Fichier lu seulement sur cet appareil. Si ton coffre n’existe pas encore, tu choisiras ensuite ton mot de passe.</div>
+ ${actionButtons('Charger mon budget')}</form>`);
+}
+
+function parseSetupFile(value){
+ if(!value||value.format!=='lucide-budget-setup'||value.version!==1||!Array.isArray(value.bills)||value.bills.length>300)throw Error('Ce fichier n’est pas un budget Lucide reconnu.');
+ const bounded=(raw,min,max,label)=>{const n=Number(raw);if(!Number.isFinite(n)||n<min||n>max)throw Error('Montant invalide : '+label);return n;};
+ const bills=value.bills.map((b,i)=>{
+  if(!b||typeof b.name!=='string'||b.name.trim().length<2||b.name.length>120||!['month','quarter','year'].includes(b.cycle))throw Error('Frais invalide à la ligne '+(i+1));
+  return {name:b.name.trim(),amount:bounded(b.amount,.01,1e7,b.name),cycle:b.cycle,category:CATEGORIES.includes(b.category)?b.category:detectCategory(b.name,-1),essential:b.essential!==false};
+ });
+ const o=value.outings||{};
+ const outings={restCount:bounded(o.restCount||0,0,100,'restaurants'),restAverage:bounded(o.restAverage||0,0,10000,'restaurant moyen'),uberCount:bounded(o.uberCount||0,0,100,'commandes'),uberAverage:bounded(o.uberAverage||0,0,10000,'prix de commande')};
+ return {monthlyIncome:bounded(value.monthlyIncome,0.01,1e7,'salaire'),mealVouchers:bounded(value.mealVouchers||0,0,1e5,'chèques-repas'),cashCushion:bounded(value.cashCushion||0,0,1e5,'réserve'),outings,bills};
+}
+
+async function applySetupFile(preset){
+ if(state.source!=='vault')throw Error('Coffre à déverrouiller');
+ const d=state.data;
+ d.monthlyIncome=preset.monthlyIncome;d.mealVouchers=preset.mealVouchers;d.cashCushion=preset.cashCushion;d.outings=preset.outings;
+ for(const b of preset.bills){
+  const found=d.bills.find(old=>canon(old.name)===canon(b.name));
+  if(found)Object.assign(found,b);
+  else d.bills.push({id:uid(),...b});
+ }
+ updateData();
+ await saveQueue;
+ state.pendingSetup=null;
+ closeModal();
+ route('overview');
+ toast('Ton budget personnel est chargé et chiffré');
+}
 function showSimpleIncome(){
  if(state.source!=='vault'){openCreateVault();return;}
  const d=state.data;
@@ -408,8 +444,19 @@ function fingerprintTransactions(rows){const occurs=new Map();return rows.map(r=
 function importBankRows(imported){const existing=new Set(state.data.transactions.map(t=>t.fingerprint).filter(Boolean));const normalized=fingerprintTransactions(imported);let count=0,dup=0;for(const raw of normalized){if(existing.has(raw.fingerprint)){dup++;continue;}const t={...raw,id:uid(),source:'Import bancaire'};state.data.transactions.push(t);existing.add(raw.fingerprint);count++;}if(!count)throw Error('Aucune nouvelle transaction : les lignes sont vides, invalides ou déjà importées');updateData();state.importInfo=null;closeModal();toast(`${count} transaction(s) importée(s)${dup?', '+dup+' doublon(s) ignoré(s)':''}`);}
 async function handleSubmit(event){const form=event.target.closest('form[data-form]');if(!form)return;event.preventDefault();const kind=form.dataset.form,id=form.dataset.id||'',button=form.querySelector('[type="submit"]');if(button)button.disabled=true;
  try{
-  if(['simple-income','simple-outings','simple-expense'].includes(kind)){handleSimpleForm(form,kind);}
-   if(kind==='create-vault'){const pass=form.elements.password.value,confirmPass=form.elements.confirmation.value;if(pass.length<12)throw Error('Utilise une phrase secrète d’au moins 12 caractères');if(pass!==confirmPass)throw Error('Les deux mots de passe ne correspondent pas');if(!state.db)throw Error('Le stockage local privé est indisponible');if(await idbGet(state.db,'finances'))throw Error('Un coffre existe déjà : déverrouille-le');await setupVault(pass);closeModal();}
+  if(kind==='setup-import'){
+ const file=form.elements.setupBudgetFile.files[0];
+ if(!file||file.size>250000)throw Error('Choisis le fichier de budget JSON (maximum 250 Ko).');
+ const preset=parseSetupFile(JSON.parse(await file.text()));
+ if(state.source==='vault'){
+  if(state.data.bills.length>0&&!confirm('Importer ce budget et mettre à jour les frais du même nom ? Les autres frais et tes transactions seront conservés.'))return;
+  await applySetupFile(preset);
+ }else{
+  state.pendingSetup=preset;closeModal();openCreateVault();
+ }
+}
+if(['simple-income','simple-outings','simple-expense'].includes(kind)){handleSimpleForm(form,kind);}
+   if(kind==='create-vault'){const pass=form.elements.password.value,confirmPass=form.elements.confirmation.value;if(pass.length<12)throw Error('Utilise une phrase secrète d’au moins 12 caractères');if(pass!==confirmPass)throw Error('Les deux mots de passe ne correspondent pas');if(!state.db)throw Error('Le stockage local privé est indisponible');if(await idbGet(state.db,'finances'))throw Error('Un coffre existe déjà : déverrouille-le');await setupVault(pass);if(state.pendingSetup)await applySetupFile(state.pendingSetup);else closeModal();}
   if(kind==='unlock'){await unlockVault(form.elements.password.value);closeModal();}
   if(kind==='transaction'){const amount=Number(form.elements.amount.value),date=form.elements.date.value,name=form.elements.name.value.trim(),category=form.elements.category.value;if(!validDate(date))throw Error('Date invalide');if(!name||!Number.isFinite(amount)||amount===0)throw Error('Ajoute un libellé et un montant non nul');const prior=state.data.transactions.find(x=>x.id===id);const tx={id:prior?.id||uid(),date,name,category,amount:validMoney(amount),source:prior?.source||'Manuel',...(prior?.fingerprint?{fingerprint:prior.fingerprint}:{})};if(prior)Object.assign(prior,tx);else state.data.transactions.push(tx);updateData();closeModal();toast('Transaction enregistrée');}
   if(kind==='bulk-bills'){state.bulkText=form.elements.lines.value;state.bulkDraft=parseBulkBills(state.bulkText);showBulkPreview();}
@@ -428,6 +475,7 @@ async function handleClick(event){const routeTarget=event.target.closest('[data-
  if(action==='month-prev'){state.month=previousMonth(state.month,-1);render();return;}
  if(action==='month-next'){state.month=previousMonth(state.month,1);render();return;}
  if(action==='create-vault'){openCreateVault();return;}
+  if(action==='setup-import'){showSetupImport();return;}
  if(action==='simple-income'){showSimpleIncome();return;}
   if(action==='simple-outings'){showSimpleOutings();return;}
   if(action==='simple-expense'){showSimpleExpense();return;}
