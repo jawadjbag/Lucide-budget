@@ -1,39 +1,192 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'self'; manifest-src 'self'" />
-  <meta name="referrer" content="no-referrer" />
-  <meta name="theme-color" content="#151c2b" />
-  <meta name="description" content="Lucide Budget : comprends tes dépenses, repère les fuites et organise tes économies." />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Lucide" />
-  <title>Lucide — Mon budget en clair</title>
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./icon-192.png" />
-  <link rel="stylesheet" href="./styles.css" />
-</head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-akJjR5HW0kCC+eSbR5YLW5swVlT8ZLSfRkP+5e10Gy4='; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; worker-src 'self'; manifest-src 'self'">
+  <meta name="theme-color" content="#f7f7fc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Lucide">
+  <meta name="description" content="Lucide Budget : revenus, dépenses et argent disponible. Sans compte ni fichier à importer.">
+  <title>Lucide — Mon budget</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <style>
+:root{--bg:#f8f9fd;--text:#1b2440;--muted:#8790a3;--line:#eef0f6;--purple:#695cdb;--deep:#272a65;--shadow:0 8px 27px rgba(31,37,67,.045)}
+*{box-sizing:border-box}html{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-text-size-adjust:100%}body{margin:0;color:var(--text);background:var(--bg);font-size:15px;line-height:1.4}
+button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #b9b4ff;outline-offset:3px}
+.app-wrapper{max-width:850px;margin:0 auto;padding:0 20px}.topbar{height:80px;display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{display:flex;align-items:center;gap:7px;font-size:24px;font-weight:900;letter-spacing:-1.2px}.brand-icon{height:37px;width:37px;border-radius:13px;background:#6e61e7;color:#fff;display:grid;place-items:center;font-size:23px;margin-right:4px}.brand-dot{color:#7768e9;margin-left:-6px}.privacy-label{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#8491a0}.privacy-dot{width:8px;height:8px;border-radius:50%;background:#3fbf8a}
+.headline{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin:21px 0 23px}.eyebrow{font-size:11px;font-weight:850;letter-spacing:1.1px;color:#776be0;text-transform:uppercase;margin:0 0 7px}.headline h1{font-size:37px;letter-spacing:-1.3px;line-height:1.1;margin:0}.headline p:not(.eyebrow){color:var(--muted);font-size:13px;margin:9px 0 0}.small-edit{border:1px solid #e5e6ef;background:#fff;color:#6158bf;border-radius:13px;padding:12px;white-space:nowrap;font-size:12px;font-weight:800;min-height:44px}
+.hero{background:linear-gradient(120deg,#262b65,#5749c9 78%,#7365eb);box-shadow:0 18px 38px #544bc326;color:#fff;padding:32px 34px;border-radius:26px;display:flex;flex-direction:column;align-items:flex-start;min-height:280px}.hero.negative{background:linear-gradient(120deg,#6b2744,#cb6988)}.hero p{font-size:12px;font-weight:850;letter-spacing:1.6px;color:#e0dafd;margin:0}.hero>strong{font-size:58px;line-height:1.3;letter-spacing:-2px;font-variant-numeric:tabular-nums;margin:11px 0 0;white-space:nowrap}.hero>small{color:#e2dffd;font-size:13px}.add-button{background:#fff;color:#5044b2;border:0;border-radius:16px;min-height:64px;min-width:275px;font-size:16px;font-weight:850;margin:29px 0 0;padding:15px 30px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:18px 0 20px}.stat{background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);padding:22px 21px;border-radius:20px;min-height:137px}.stat-label{font-weight:750;color:#818ca2;font-size:12px}.stat strong{font-size:26px;letter-spacing:-.9px;margin:15px 0 6px;display:block;font-variant-numeric:tabular-nums;white-space:nowrap}.stat small{display:block;font-size:11px;color:#9ca4b4;line-height:1.4}.stat.saving strong{color:#4e51bb}
+.panel{background:white;border:1px solid var(--line);box-shadow:var(--shadow);border-radius:22px;padding:25px;margin-bottom:18px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:14px}.section-head h2{font-size:21px;letter-spacing:-.5px;line-height:1.2;margin:0}.section-head p{color:#9aa3b2;font-size:12px;margin:5px 0 0}.chart-area{display:grid;grid-template-columns:260px 1fr;gap:31px;align-items:center;margin:18px 0 1px}.donut{width:235px;height:235px;border-radius:50%;display:grid;place-items:center;margin:7px auto}.donut-middle{width:74%;height:74%;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px;text-align:center}.donut-middle small{font-size:12px;color:#8e96a8}.donut-middle strong{font-size:25px;line-height:1.2;letter-spacing:-.7px;margin-top:7px;font-variant-numeric:tabular-nums;white-space:nowrap}.legend-row{display:flex;gap:10px;align-items:center;border-bottom:1px solid #f1f3f7;min-height:48px}.legend-row:last-child{border:0}.legend-row span{font-size:13px;color:#6c7588;flex:1}.legend-row strong{white-space:nowrap;font-size:14px}.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}.dot.purple{background:#776bf4}.dot.orange{background:#ffb477}.dot.pink{background:#f29ba1}.dot.mint{background:#e6f3ee;border:1px solid #cae8d9}
+.habit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:20px}.habit{border:1px solid #ebebf5;background:#fafaff;border-radius:17px;min-height:148px;display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;padding:20px;position:relative}.habit .emoji{font-size:26px;margin-bottom:3px}.habit strong{font-size:16px}.habit>span:not(.emoji){font-size:15px;font-weight:850;color:#574bc3}.habit small{font-size:11px;color:#9aa2b2}.habit b{position:absolute;top:18px;right:19px;color:#aca6dc;font-size:18px}
+.minor-button{background:#f0eeff;color:#6255cb;border:0;border-radius:12px;min-height:38px;padding:9px 12px;font-size:12px;font-weight:800}.bill-list{margin-top:15px}.bill{display:flex;align-items:center;text-align:left;width:100%;gap:12px;min-height:66px;border:0;border-bottom:1px solid #f0f1f5;background:#fff;padding:12px 2px;color:var(--text)}.bill:last-child{border-bottom:0}.bill span{display:flex;flex-direction:column;flex:1;min-width:0}.bill span strong{font-size:14px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bill span small{font-size:11px;color:#a0a8b6;margin-top:3px}.bill>strong{font-size:15px;white-space:nowrap;font-variant-numeric:tabular-nums}.bill>strong small{color:#9ea8b6;font-size:10px;font-weight:400;margin-left:3px}.bill>i{font-style:normal;color:#a5a0cd;margin-left:8px}.muted-empty{color:#a0a7b5;font-size:12px;padding:18px 0}
+.footnote{font-size:11px;line-height:1.7;color:#8b96a7;padding:2px 4px}.settings-line{display:flex;gap:11px;margin:17px 0 30px}.settings-line button{flex:1;border:1px solid #e7eaf2;color:#665cc5;background:#fff;padding:15px 12px;border-radius:14px;font-size:12px;font-weight:750}footer{text-align:center;padding:0 0 22px;font-size:11px;color:#a0a8b7}.loading{min-height:60vh;display:grid;place-items:center;color:#929bab}.empty-banner{background:#f0efff;border:1px solid #dedbf9;border-radius:17px;padding:20px;margin-bottom:18px}.empty-banner strong{font-size:16px}.empty-banner p{color:#8881ba;font-size:12px}.empty-banner button{border:0;border-radius:12px;background:#6155cd;color:white;padding:13px 17px;font-weight:850}
+dialog{width:min(480px,calc(100vw - 28px));border:0;border-radius:25px;box-shadow:0 25px 110px #1b224c4e;padding:25px;max-height:min(88vh,800px);overflow:auto;color:var(--text)}dialog::backdrop{background:#1c214ab5;backdrop-filter:blur(3px)}.modal-header{display:flex;align-items:center;justify-content:space-between;margin:0 0 22px}.modal-header h2{font-size:22px;letter-spacing:-.6px;margin:0}.close{font-size:29px;color:#9198a7;background:#f4f5f9;min-width:42px;min-height:42px;border:0;border-radius:50%}.field{display:flex;flex-direction:column;gap:9px;margin:15px 0;color:#515d76;font-size:13px;font-weight:750}.field input,.field select{background:#f7f8fd;border:1px solid #e5e8f0;border-radius:13px;width:100%;min-height:54px;padding:13px;font-size:16px;color:#242945}.field input:focus,.field select:focus{outline:2px solid #a49bfa}.submit{width:100%;background:#6558de;color:#fff;border:0;border-radius:13px;min-height:57px;font-weight:850;font-size:16px;margin-top:16px}.remove{margin:14px 0 1px;color:#bc516c;border:0;background:#fff;font-weight:750}.modal-help{font-size:13px;color:#808b9c;line-height:1.5}.visible{opacity:1!important;transform:translateX(-50%) translateY(0)!important}#notice{position:fixed;z-index:999;left:50%;bottom:22px;transform:translateX(-50%) translateY(22px);opacity:0;transition:.2s;max-width:calc(100vw - 25px);width:max-content;text-align:center;box-shadow:0 15px 40px #1f24476b;color:#fff;background:#262b55;border-radius:15px;font-size:12px;font-weight:750;padding:15px 20px}
+@media(max-width:700px){.app-wrapper{padding:0 16px}.topbar{height:67px}.brand{font-size:22px}.privacy-label{font-size:10px}.headline{margin:18px 0}.headline h1{font-size:31px}.headline p:not(.eyebrow){font-size:12px}.small-edit{font-size:11px;padding:11px 10px}.hero{padding:26px 24px;border-radius:22px;min-height:261px}.hero>strong{font-size:48px}.add-button{min-width:100%;min-height:63px;margin-top:29px}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat{min-height:129px;padding:17px 15px}.stat strong{font-size:21px}.stat.saving{grid-column:span 2;min-height:104px}.stat.saving strong{font-size:25px;margin-top:8px}.panel{padding:20px 18px;border-radius:20px}.section-head h2{font-size:19px}.chart-area{grid-template-columns:1fr;gap:9px}.donut{width:212px;height:212px}.donut-middle strong{font-size:23px}.legend{margin:3px 0 0}.legend-row{min-height:41px}.habit-grid{gap:9px}.habit{padding:15px 13px;min-height:150px}.habit strong{font-size:14px}.habit>span:not(.emoji){font-size:14px}.habit small{font-size:10px}.habit b{right:12px;top:13px}.bill>strong{font-size:14px}.bill span strong{font-size:13px}.bill>i{margin-left:1px}footer{padding-bottom:21px}}
+@media(max-width:375px){.hero>strong{font-size:41px}.stat strong{font-size:19px}.privacy-label{font-size:9px}.habit>span:not(.emoji){font-size:12px}.headline h1{font-size:28px}}
 
+  </style>
+
+</head>
 <body>
- <div class="app-shell">
-  <div class="app-area">
-   <header class="topbar">
-    <div class="topbar-left"><span class="app-brand"><span>↗</span> lucide<strong>.</strong></span><span class="top-crumb">/</span><strong id="crumbCurrent">Accueil</strong></div>
-    <div class="topbar-right"><span class="offline-badge"><span class="privacy-dot"></span> Privé & local</span><button class="top-settings" data-route="settings" aria-label="Réglages et sauvegardes">⚙</button></div>
-   </header>
-   <main class="page" id="app" tabindex="-1"></main>
+  <div class="app-wrapper">
+    <header class="topbar"><div class="brand"><span class="brand-icon">↗</span>lucide<span class="brand-dot">.</span></div><span class="privacy-label"><span class="privacy-dot"></span>Sur cet appareil</span></header>
+    <main id="app" aria-live="polite"><div class="loading">Chargement de ton budget…</div></main>
+    <footer>Lucide Budget · Budget estimatif, pas le solde bancaire réel.</footer>
   </div>
- </div>
- <nav class="bottom-nav" aria-label="Navigation principale">
-  <button data-route="overview" class="active"><span>⌂</span><small>Accueil</small></button>
-  <button data-route="bills"><span>▤</span><small>Mes frais</small></button>
-  <button data-route="settings"><span>⚙</span><small>Mon coffre</small></button>
- </nav>
- <dialog id="modal" aria-label="Formulaire"><div id="modalContent"></div></dialog>
- <div id="toast" role="status" aria-live="polite"></div>
- <script src="./app.js" defer></script>
+  <dialog id="editor" aria-label="Modifier mon budget"><div id="editorContent"></div></dialog>
+  <div id="notice" role="status" aria-live="polite"></div>
+<script>
+/* Lucide Budget – local, single screen, no API and no analytics. */
+(() => {
+'use strict';
+const $ = s => document.querySelector(s);
+const DB_NAME='lucide-simple-budget-v1';
+const YEAR_MONTH=()=>{const x=new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')};
+const euro=x=>new Intl.NumberFormat('fr-BE',{style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}).format(x);
+const escapeText=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const randomID=()=>crypto.randomUUID?crypto.randomUUID():String(Date.now())+String(Math.random());
+const nonnegative=(x,max=10000000)=>{const n=Number(x);if(!Number.isFinite(n)||n<0||n>max)throw Error('Vérifie le montant saisi.');return n};
+const toCents=x=>Math.round((x+Number.EPSILON)*100)/100;
+const newBudget=()=>({schema:'lucide-personal-v1',salary:0,vouchers:0,reserve:0,bills:[],orders:{count:0,unit:0},restaurants:{count:0,unit:0},extras:[]});
+let budget=newBudget(),db=null,cryptoKey=null,ephemeral=false,saveChain=Promise.resolve(),initialized=false;
+function validate(x){
+ if(!x||x.schema!=='lucide-personal-v1'||!Array.isArray(x.bills)||x.bills.length>500||!Array.isArray(x.extras)||x.extras.length>2000)throw Error('Budget non reconnu');
+ const d=newBudget();d.salary=nonnegative(x.salary);d.vouchers=nonnegative(x.vouchers||0);d.reserve=nonnegative(x.reserve||0);
+ d.bills=x.bills.map((b,i)=>{if(!b||typeof b.label!=='string'||b.label.length>120||!['month','quarter','year'].includes(b.period))throw Error('Ligne de charge incorrecte : '+i);return {id:String(b.id||randomID()).slice(0,120),label:b.label.trim(),amount:nonnegative(b.amount),period:b.period};});
+ for(const type of ['orders','restaurants']){const o=x[type]||{};d[type]={count:nonnegative(o.count||0,100),unit:nonnegative(o.unit||0)}};
+ d.extras=x.extras.map(e=>{if(!e||typeof e.label!=='string'||e.label.length>120||!['once','month','quarter','year'].includes(e.period))throw Error('Dépense incorrecte');return {id:String(e.id||randomID()).slice(0,120),label:e.label,amount:nonnegative(e.amount),period:e.period,month:typeof e.month==='string'?e.month.slice(0,7):YEAR_MONTH()}});
+ return d;
+}
+function budgetFromLink(){
+ const m=location.hash.match(/^#budget=([A-Za-z0-9_-]+)$/);
+ if(!m)return null;
+ try {
+  const encoded=m[1].replace(/-/g,'+').replace(/_/g,'/');
+  const binary=atob(encoded);const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+  const raw=JSON.parse(new TextDecoder().decode(bytes));
+  if(Array.isArray(raw)&&raw[0]===1){const [_,salary,vouchers,reserve,orderCount,orderPrice,restCount,restPrice,items]=raw;return validate({schema:'lucide-personal-v1',salary,vouchers,reserve,orders:{count:orderCount,unit:orderPrice},restaurants:{count:restCount,unit:restPrice},extras:[],bills:items.map(([label,amount,cycle],i)=>({id:'entry-'+(i+1),label,amount,period:({m:'month',q:'quarter',y:'year'})[cycle]}))});}
+  return validate(raw);
+ } catch(e){setTimeout(()=>alert('Le lien de configuration est invalide. Réessaie depuis la conversation.'),200);return null;}
+ finally {history.replaceState(null,'',location.pathname+location.search);}
+}
+function request(store,mode,callback){return new Promise((resolve,reject)=>{const tx=db.transaction(store,mode);const req=callback(tx.objectStore(store));if(req){req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);}else{tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error)}})}
+async function openPrivateStorage(){
+ db=await new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,1);req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains('data'))req.result.createObjectStore('data')};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
+ cryptoKey=await request('data','readonly',store=>store.get('device-key'));
+ if(!cryptoKey){cryptoKey=await crypto.subtle.generateKey({name:'AES-GCM',length:256},false,['encrypt','decrypt']);await request('data','readwrite',store=>store.put(cryptoKey,'device-key'))}
+}
+async function loadPrivateData(){
+ const sealed=await request('data','readonly',store=>store.get('budget'));
+ if(!sealed)return null;
+ const clear=await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(sealed.iv)},cryptoKey,new Uint8Array(sealed.cipher));
+ return validate(JSON.parse(new TextDecoder().decode(clear)));
+}
+async function storePrivateData(snapshot){
+ const iv=crypto.getRandomValues(new Uint8Array(12));
+ const clear=new TextEncoder().encode(JSON.stringify(snapshot));
+ const cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},cryptoKey,clear);
+ await request('data','readwrite',store=>store.put({iv:Array.from(iv),cipher:Array.from(new Uint8Array(cipher))},'budget'));
+}
+function save(){if(ephemeral||!db){notify('Stockage indisponible : modifications non sauvegardées');return}const snapshot=structuredClone(budget);saveChain=saveChain.then(()=>storePrivateData(snapshot)).catch(e=>{console.error(e);notify('Sauvegarde impossible : vérifie le stockage de Safari')})}
+function notify(text){const el=$('#notice');el.textContent=text;el.classList.add('visible');clearTimeout(notify.timer);notify.timer=setTimeout(()=>el.classList.remove('visible'),4100)}
+const monthly=x=>x.period==='year'?x.amount/12:x.period==='quarter'?x.amount/3:x.amount;
+function totals(){const fixed=budget.bills.reduce((s,b)=>s+monthly(b),0),orders=budget.orders.count*budget.orders.unit,restaurants=budget.restaurants.count*budget.restaurants.unit;
+ const extra=budget.extras.filter(e=>e.period!=='once'||e.month===YEAR_MONTH()).reduce((s,e)=>s+monthly(e),0);
+ const spent=fixed+orders+restaurants+extra,remaining=budget.salary-spent,maxSaving=Math.max(0,remaining-budget.reserve);return{fixed,orders,restaurants,extra,spent,remaining,maxSaving};}
+const block=(label,value,meta,cls='')=>`<article class="stat ${cls}"><div class="stat-label">${label}</div><strong>${value}</strong><small>${meta}</small></article>`;
+function chart(t){const base=Math.max(budget.salary,t.spent,1),ratio=n=>Math.max(0,Math.min(100,n/base*100));const a=ratio(t.fixed),b=ratio(t.orders+t.restaurants),c=ratio(t.extra),d=Math.min(100,a+b+c);
+ const gradient=`conic-gradient(#776bf4 0% ${a}%, #ffb477 ${a}% ${a+b}%, #f29ba1 ${a+b}% ${d}%, #e6f3ee ${d}% 100%)`;
+ return `<div class="chart-area"><div class="donut" style="background:${gradient}" role="img" aria-label="Diagramme des frais du mois"><div class="donut-middle"><small>Il te reste</small><strong>${euro(t.remaining)}</strong></div></div><div class="legend">
+ ${legendRow('Frais fixes',t.fixed,'purple')}${legendRow('Restos & commandes',t.orders+t.restaurants,'orange')}${legendRow('Autres frais',t.extra,'pink')}${legendRow('Reste',Math.max(0,t.remaining),'mint')}
+ </div></div>`;
+}
+const legendRow=(n,v,c)=>`<div class="legend-row"><i class="dot ${c}"></i><span>${n}</span><strong>${euro(v)}</strong></div>`;
+function render(){
+ if(!initialized)return;
+ const t=totals(),hasIncome=budget.salary>0;
+ const extras=budget.extras.filter(e=>e.period!=='once'||e.month===YEAR_MONTH());
+ $('#app').innerHTML=`
+ <div class="headline"><div><p class="eyebrow">MON ARGENT · ${new Intl.DateTimeFormat('fr-BE',{month:'long',year:'numeric'}).format(new Date())}</p><h1>Mon budget</h1><p>Simple. Clair. Sans prise de tête.</p></div><button class="small-edit" data-action="income" aria-label="Modifier mon salaire">✎ Modifier</button></div>
+ ${!hasIncome?`<section class="empty-banner"><strong>Ton salaire n'est pas encore enregistré</strong><p>Ajoute ton salaire pour calculer ton reste.</p><button data-action="income">Ajouter mon salaire</button></section>`:''}
+ <section class="hero ${t.remaining<0?'negative':''}"><p>IL ME RESTE CE MOIS-CI</p><strong>${hasIncome?euro(t.remaining):'—'}</strong><small>${hasIncome?'Après tes frais et sorties prévus':'Aucun salaire renseigné'}</small><button class="add-button" data-action="add">＋ Ajouter un frais</button></section>
+ <section class="stats">${block('Mon salaire',hasIncome?euro(budget.salary):'—','Revenu net mensuel')}${block('Mes dépenses',euro(t.spent),'Frais prévus par mois')}${block('Épargne possible',hasIncome?euro(t.maxSaving):'—','Plafond provisoire, avant dépenses oubliées','saving')}</section>
+ <section class="panel"><div class="section-head"><div><h2>Où va mon argent ?</h2><p>Répartition mensuelle</p></div></div>${chart(t)}</section>
+ <section class="panel"><div class="section-head"><div><h2>Mes habitudes</h2><p>Modifie les montants quand tu veux</p></div></div><div class="habit-grid">
+ <button data-action="orders" class="habit"><span class="emoji">🛵</span><strong>Livraisons</strong><span>${euro(t.orders)} / mois</span><small>${budget.orders.count} commandes à ${euro(budget.orders.unit)}</small><b>✎</b></button>
+ <button data-action="restaurants" class="habit"><span class="emoji">🍽️</span><strong>Restaurants</strong><span>${euro(t.restaurants)} / mois</span><small>${euro(budget.restaurants.unit)} par sortie</small><b>✎</b></button>
+ </div></section>
+ <section class="panel"><div class="section-head"><div><h2>Mes frais fixes</h2><p>${budget.bills.length} frais · ${euro(t.fixed)}/mois</p></div><button class="minor-button" data-action="add">＋ Ajouter</button></div>
+ <div class="bill-list">${budget.bills.length?budget.bills.map(b=>`<button class="bill" data-action="edit-bill" data-id="${escapeText(b.id)}"><span><strong>${escapeText(b.label)}</strong><small>${b.period==='year'?'Annuel':b.period==='quarter'?'Trimestriel':'Mensuel'}</small></span><strong>${euro(monthly(b))}<small>/mois</small></strong><i>✎</i></button>`).join(''):'<p class="muted-empty">Aucun frais fixe. Tu peux en ajouter avec le bouton ci-dessus.</p>'}</div></section>
+ ${extras.length?`<section class="panel"><div class="section-head"><div><h2>Autres frais</h2><p>${euro(t.extra)} ce mois-ci</p></div></div><div class="bill-list">${extras.map(e=>`<button class="bill" data-action="edit-extra" data-id="${escapeText(e.id)}"><span><strong>${escapeText(e.label)}</strong><small>${e.period==='once'?'Ponctuel':e.period==='year'?'Annuel':e.period==='quarter'?'Trimestriel':'Mensuel'}</small></span><strong>${euro(monthly(e))}<small>${e.period==='once'?'':'/mois'}</small></strong><i>✎</i></button>`).join('')}</div></section>`:''}
+ <p class="footnote">Les ${euro(budget.vouchers)} de chèques-repas sont comptés à part. Le « reste » est une estimation, pas ton solde bancaire. Courses, carburant et imprévus non renseignés peuvent encore réduire l’épargne possible.</p>
+ <div class="settings-line"><button data-action="income">Modifier mon salaire</button><button data-action="reserve">Définir ma réserve</button></div>`;
+}
+function field(label,name,value,extra=''){return `<label class="field"><span>${label}</span><input name="${name}" ${extra} value="${escapeText(value)}" required></label>`}
+const amountField=(label,name,value)=>field(label,name,value,'type="number" min="0" max="10000000" step="0.01" inputmode="decimal"');
+function frequency(selected='once'){return `<label class="field"><span>Fréquence</span><select name="period">${[['once','Une seule fois'],['month','Tous les mois'],['quarter','Tous les 3 mois'],['year','Chaque année']].map(([v,n])=>`<option value="${v}" ${v===selected?'selected':''}>${n}</option>`).join('')}</select></label>`}
+function openEditor(title,content,type,id=''){$('#editorContent').innerHTML=`<div class="modal-header"><h2>${title}</h2><button class="close" data-close aria-label="Fermer">×</button></div><form data-type="${type}" data-id="${escapeText(id)}">${content}<button type="submit" class="submit">Enregistrer</button></form>`;$('#editor').showModal()}
+function closeEditor(){$('#editor').close();$('#editorContent').innerHTML=''}
+function edit(type,id=''){
+ if(type==='add'){openEditor('Ajouter un frais',field('Nom du frais','label','','type="text" maxlength="100" placeholder="Ex. : Courses, assurance…"')+amountField('Montant en €','amount','')+frequency('once'),'add');return}
+ if(type==='income'){openEditor('Mes revenus',amountField('Salaire net mensuel (€)','salary',budget.salary||'')+amountField('Chèques-repas par mois (€)','vouchers',budget.vouchers),'income');return}
+ if(type==='reserve'){openEditor('Ma réserve',`<p class="modal-help">Le montant que tu souhaites garder pour les imprévus avant de calculer une épargne possible.</p>`+amountField('Réserve mensuelle (€)','reserve',budget.reserve),'reserve');return}
+ if(type==='orders'||type==='restaurants'){
+  const x=budget[type],isOrders=type==='orders';openEditor(isOrders?'Mes livraisons':'Mes restaurants',`<p class="modal-help">${isOrders?'Uber Eats, Deliveroo et Takeaway ensemble.':'Ta fréquence moyenne sur un mois.'}</p>`+amountField(isOrders?'Nombre total de commandes / mois':'Nombre de restaurants / mois','count',x.count)+amountField('Prix moyen en €','unit',x.unit),type);return;
+ }
+ if(type==='edit-bill'||type==='edit-extra'){
+  const obj=(type==='edit-bill'?budget.bills:budget.extras).find(x=>x.id===id);if(!obj)return;
+  openEditor('Modifier un frais',field('Nom du frais','label',obj.label,'type="text" maxlength="100"')+amountField('Montant en €','amount',obj.amount)+frequency(obj.period)+`<button class="remove" type="button" data-action="delete" data-kind="${type==='edit-bill'?'bill':'extra'}" data-id="${escapeText(id)}">Supprimer ce frais</button>`,'edit',id);
+ }
+}
+function saveForm(form){
+ const data=new FormData(form),type=form.dataset.type,id=form.dataset.id;
+ const get=n=>nonnegative(data.get(n));
+ if(type==='income'){budget.salary=get('salary');budget.vouchers=get('vouchers')}
+ else if(type==='reserve'){budget.reserve=get('reserve')}
+ else if(type==='orders'||type==='restaurants'){budget[type]={count:get('count'),unit:get('unit')}}
+ else if(type==='add'||type==='edit'){
+  const label=String(data.get('label')||'').trim(),amount=get('amount'),period=String(data.get('period'));
+  if(!label||label.length>100||!['once','month','quarter','year'].includes(period)||amount<=0)throw Error('Renseigne un nom et un montant valide.');
+  if(type==='edit'){
+   const obj=[...budget.bills,...budget.extras].find(x=>x.id===id);if(!obj)return;
+   const wasBill=budget.bills.some(x=>x.id===id),isBill=wasBill&&period!=='once';
+   budget.bills=budget.bills.filter(x=>x.id!==id);budget.extras=budget.extras.filter(x=>x.id!==id);
+   if(isBill)budget.bills.push({id,label,amount,period});else budget.extras.push({id,label,amount,period,month:YEAR_MONTH()});
+  }else if(period==='once')budget.extras.push({id:randomID(),label,amount,period,month:YEAR_MONTH()});
+  else budget.bills.push({id:randomID(),label,amount,period});
+ }
+ closeEditor();render();save();notify('Enregistré sur cet appareil');
+}
+async function init(){
+ const incoming=budgetFromLink();
+ try{await openPrivateStorage();const existing=await loadPrivateData();
+  if(existing&&(existing.salary>0||existing.bills.length||existing.extras.length))budget=existing;
+  else if(incoming){budget=incoming;await storePrivateData(budget)}
+  else budget=existing||newBudget();
+ }catch(err){console.error('Private storage:',err);ephemeral=true;budget=incoming||newBudget();notify('Attention : le stockage privé est indisponible. Tes changements ne seront pas conservés.')}
+ initialized=true;render();
+}
+document.addEventListener('click',event=>{
+ if(event.target.closest('[data-close]')){closeEditor();return}
+ const button=event.target.closest('[data-action]');if(!button)return;
+ const action=button.dataset.action;
+ if(action==='delete'){
+  if(!confirm('Supprimer ce frais ?'))return;const id=button.dataset.id;
+  budget.bills=budget.bills.filter(x=>x.id!==id);budget.extras=budget.extras.filter(x=>x.id!==id);closeEditor();render();save();return;
+ }
+ edit(action,button.dataset.id||'');
+});
+$('#editor').addEventListener('click',event=>{if(event.target===$('#editor'))closeEditor()});
+document.addEventListener('submit',event=>{const form=event.target.closest('form[data-type]');if(!form)return;event.preventDefault();try{saveForm(form)}catch(err){notify(err.message||'Saisie incorrecte')}});
+init();
+if('serviceWorker'in navigator&&location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+})();
+
+</script>
 </body>
 </html>
